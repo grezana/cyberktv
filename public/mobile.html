@@ -739,7 +739,7 @@ function showErr(msg) {
   el._t = setTimeout(() => el.textContent = '', 3000);
 }
 
-socket.on('room-joined', ({ state: s, lanIP, port }) => {
+socket.on('room-joined', ({ state: s, lanIP, port, publicUrl }) => {
   if (isReconnecting) {
     isReconnecting = false;
     applyState(s);
@@ -747,7 +747,7 @@ socket.on('room-joined', ({ state: s, lanIP, port }) => {
     return;
   }
   roomCode = s.roomCode;
-  const base = lanIP && lanIP !== 'localhost' ? `http://${lanIP}:${port}` : location.origin;
+  const base = publicUrl || (lanIP && lanIP !== 'localhost' ? `http://${lanIP}:${port}` : location.origin);
   joinUrl = `${base}/mobile.html?room=${s.roomCode}`;
 
   document.getElementById('prof-avatar').textContent = myName.charAt(0).toUpperCase();

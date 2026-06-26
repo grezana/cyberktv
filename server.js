@@ -145,7 +145,7 @@ io.on('connection', (socket) => {
     isTV = false;
     socket.join(roomCode);
     if (!isRejoin) room.clientCount = (room.clientCount || 0) + 1;
-    socket.emit('room-joined', { state: publicState(room), lanIP: LAN_IP, port: PORT });
+    socket.emit('room-joined', { state: publicState(room), lanIP: LAN_IP, port: PORT, publicUrl: PUBLIC_URL });
     io.to(room.tvSocketId).emit('client-joined', { name: userName });
     io.to(roomCode).emit('client-count', { count: room.clientCount });
     console.log(`[${roomCode}] ${userName} ${isRejoin ? 're-synced' : 'joined'} (${room.clientCount} guests)`);
