@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#060612"/>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a0a3a"/>
+      <stop offset="100%" stop-color="#060612"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Mic body -->
+  <rect x="220" y="100" width="72" height="140" rx="36" fill="none" stroke="#00f5ff" stroke-width="12" filter="url(#glow)"/>
+  <!-- Mic stand arm -->
+  <path d="M160 240 Q160 330 256 330 Q352 330 352 240" fill="none" stroke="#00f5ff" stroke-width="12" stroke-linecap="round" filter="url(#glow)"/>
+  <!-- Mic stand base -->
+  <line x1="256" y1="330" x2="256" y2="400" stroke="#00f5ff" stroke-width="12" stroke-linecap="round" filter="url(#glow)"/>
+  <line x1="196" y1="400" x2="316" y2="400" stroke="#00f5ff" stroke-width="12" stroke-linecap="round"/>
+  <!-- Glow dot on mic -->
+  <circle cx="256" cy="170" r="12" fill="#00f5ff" filter="url(#glow)" opacity="0.8"/>
+  <!-- KTV text -->
+  <text x="256" y="472" font-family="Arial Black, sans-serif" font-size="60" font-weight="900"
+    text-anchor="middle" fill="#ff006e" filter="url(#glow)" letter-spacing="4">KTV</text>
+</svg>

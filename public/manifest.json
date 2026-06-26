@@ -1,0 +1,16 @@
+{
+  "name": "CyberKTV Remote",
+  "short_name": "CyberKTV",
+  "description": "YouTube Karaoke remote controller",
+  "start_url": "/mobile.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#060612",
+  "theme_color": "#060612",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["entertainment", "music"],
+  "lang": "en"
+}

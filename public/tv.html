@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberKTV — TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Noto+Sans:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#000}
+
+/* ── Themes ───────────────────────────────────────────── */
+:root{
+  --bg:#060612;--bg2:#0d0d25;--a1:#00f5ff;--a2:#ff006e;--a3:#7b2fff;
+  --text:#ffffff;--text2:#99aacc;
+  --glass:rgba(6,6,24,0.85);--border:rgba(0,245,255,0.22);
+  --glow:0 0 20px rgba(0,245,255,0.45);
+  --font-h:'Orbitron',sans-serif;--font-b:'Rajdhani',sans-serif;
+  --scan:none;
+  --vignette:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.55) 100%);
+}
+body.theme-ktv{
+  --bg:#110000;--bg2:#1e0000;--a1:#ffd700;--a2:#ff3333;--a3:#cc8800;
+  --text:#fff5e0;--text2:#cc9966;
+  --glass:rgba(17,0,0,0.88);--border:rgba(255,215,0,0.28);
+  --glow:0 0 24px rgba(255,215,0,0.4);
+  --font-h:'Noto Sans',sans-serif;--font-b:'Noto Sans',sans-serif;
+}
+body.theme-glass{
+  --bg:#080818;--bg2:#0f0f2a;--a1:#c8b8ff;--a2:#ff85c8;--a3:#85c8ff;
+  --text:#e8e8ff;--text2:#7777aa;
+  --glass:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.14);
+  --glow:0 0 20px rgba(200,184,255,0.25);
+  --font-h:'Noto Sans',sans-serif;--font-b:'Noto Sans',sans-serif;
+}
+body.theme-retro{
+  --bg:#000000;--bg2:#000800;--a1:#00ff41;--a2:#ffff00;--a3:#00cc33;
+  --text:#00ff41;--text2:#007722;
+  --glass:rgba(0,8,0,0.9);--border:rgba(0,255,65,0.28);
+  --glow:0 0 14px rgba(0,255,65,0.55);
+  --font-h:'Share Tech Mono',monospace;--font-b:'Share Tech Mono',monospace;
+  --scan:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.16) 2px,rgba(0,0,0,0.16) 4px);
+}
+
+body{font-family:var(--font-b);color:var(--text);background:var(--bg);position:relative}
+
+/* ── Base layers ──────────────────────────────────────── */
+#player-wrap{position:fixed;inset:0;z-index:1;background:#000}
+#player-wrap iframe{width:100%;height:100%;border:0;display:block}
+#scanlines{position:fixed;inset:0;z-index:2;pointer-events:none;background:var(--scan)}
+#vignette{position:fixed;inset:0;z-index:3;pointer-events:none;background:var(--vignette)}
+#emoji-layer{position:fixed;inset:0;z-index:10;pointer-events:none;overflow:hidden}
+
+/* ── Emoji burst ──────────────────────────────────────── */
+@keyframes emojiBurst{
+  0%{transform:translate(-50%,-50%) scale(0) rotate(-8deg);opacity:0}
+  22%{transform:translate(-50%,-50%) scale(1.35) rotate(4deg);opacity:1}
+  55%{transform:translate(-50%,-50%) scale(1.05) rotate(-1deg);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(0.7);opacity:0}
+}
+.emoji-burst{
+  position:absolute;pointer-events:none;
+  transform:translate(-50%,-50%) scale(0);
+  animation:emojiBurst 1.6s cubic-bezier(0.34,1.4,0.64,1) forwards;
+  filter:drop-shadow(0 4px 24px rgba(0,0,0,0.6));
+  line-height:1;
+}
+
+/* ── Activate overlay ─────────────────────────────────── */
+#activate-overlay{
+  position:fixed;inset:0;z-index:90;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);
+  cursor:pointer;gap:16px;
+}
+#activate-overlay.hidden{display:none}
+.act-icon{font-size:3.5rem;animation:actBounce 1.4s ease-in-out infinite}
+@keyframes actBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.act-text{
+  font-family:var(--font-h);font-size:clamp(1rem,2.5vw,1.5rem);color:var(--a1);
+  letter-spacing:0.15em;text-shadow:var(--glow);text-align:center;padding:0 20px;
+  animation:actPulse 1.8s ease-in-out infinite;
+}
+@keyframes actPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.act-sub{font-family:var(--font-b);font-size:.9rem;color:var(--text2);letter-spacing:.05em}
+
+/* ── Idle screen ──────────────────────────────────────── */
+#idle-screen{
+  position:fixed;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg);gap:28px;
+}
+.logo{font-family:var(--font-h);font-size:clamp(2rem,5vw,3.8rem);font-weight:900;
+  color:var(--a1);letter-spacing:0.15em;text-shadow:var(--glow)}
+.logo span{color:var(--a2)}
+#join-box{
+  display:flex;gap:40px;align-items:center;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:22px;padding:32px 44px;
+  backdrop-filter:blur(14px);box-shadow:var(--glow);
+}
+#qr-idle{border-radius:10px;flex-shrink:0;width:160px;height:160px;
+  background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#qr-idle img,#qr-idle canvas{width:160px!important;height:160px!important}
+.join-info{display:flex;flex-direction:column;gap:10px}
+.join-info .label{font-size:.88rem;color:var(--text2);letter-spacing:.08em;text-transform:uppercase}
+#room-code-big{font-family:var(--font-h);font-size:clamp(3rem,6vw,4.8rem);
+  font-weight:900;color:var(--a1);letter-spacing:.35em;text-shadow:var(--glow)}
+.join-info .url-hint{font-size:.9rem;color:var(--text2)}
+.join-info .url-hint strong{color:var(--a1)}
+.dots{display:flex;gap:7px;margin-top:6px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--a1);
+  animation:dotPulse 1.4s infinite ease-in-out}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes dotPulse{0%,80%,100%{opacity:.2;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
+
+/* ── No-song screen ───────────────────────────────────── */
+#no-song{
+  position:fixed;inset:0;z-index:5;display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg);gap:16px;
+  font-family:var(--font-h);font-size:1.3rem;color:var(--text2);text-align:center;line-height:2
+}
+
+/* ── Top corner badges ────────────────────────────────── */
+#room-badge{
+  position:fixed;top:16px;left:16px;z-index:16;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:10px;padding:8px 16px;
+  backdrop-filter:blur(12px);
+  font-family:var(--font-h);font-size:1rem;font-weight:700;
+  color:var(--a1);letter-spacing:.22em;
+  box-shadow:var(--glow);display:none;
+}
+#room-badge.show{display:block}
+#play-qr-wrap{
+  position:fixed;top:16px;right:16px;z-index:16;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:12px;padding:6px;
+  backdrop-filter:blur(12px);
+  box-shadow:var(--glow);display:none;
+  flex-direction:column;align-items:center;gap:4px;
+}
+#play-qr-wrap.show{display:flex}
+#qr-play{border-radius:6px;width:90px;height:90px;
+  background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#qr-play img,#qr-play canvas{width:90px!important;height:90px!important}
+.qr-code-label{font-size:.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
+
+/* ── Song info overlay ────────────────────────────────── */
+#song-info{
+  position:fixed;bottom:0;left:0;right:0;z-index:15;
+  padding:18px 28px 22px;
+  background:linear-gradient(to top,rgba(0,0,0,0.88) 0%,transparent 100%);
+  transition:opacity .4s,transform .4s;
+}
+#song-info.sidebar-open{right:300px}
+#song-info.hidden{opacity:0;transform:translateY(20px);pointer-events:none}
+#song-title{
+  font-family:var(--font-h);font-size:clamp(1.1rem,2.6vw,2rem);font-weight:700;
+  color:var(--text);text-shadow:0 2px 8px rgba(0,0,0,0.9);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+#singer-name{
+  font-family:var(--font-b);font-size:clamp(.9rem,1.5vw,1.3rem);
+  color:var(--a1);margin-top:4px;font-weight:600;text-shadow:var(--glow)
+}
+#singer-name::before{content:'🎤 '}
+
+/* ── Next-up card ─────────────────────────────────────── */
+#next-up{
+  position:fixed;bottom:24px;right:24px;z-index:15;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:12px;padding:11px 13px;
+  backdrop-filter:blur(10px);
+  display:none;align-items:center;gap:11px;max-width:270px;
+  box-shadow:var(--glow);
+}
+#next-up.show{display:flex}
+#next-up img{width:54px;height:40px;object-fit:cover;border-radius:5px;flex-shrink:0}
+.next-texts{overflow:hidden}
+.next-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--a2);font-weight:700}
+.next-title{font-size:.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next-singer{font-size:.75rem;color:var(--a1)}
+
+/* ── Queue sidebar ────────────────────────────────────── */
+#queue-sidebar{
+  position:fixed;top:0;right:0;bottom:0;z-index:14;width:290px;
+  background:var(--glass);border-left:1px solid var(--border);
+  backdrop-filter:blur(18px);display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .35s ease;
+}
+#queue-sidebar.open{transform:translateX(0)}
+.sb-header{
+  padding:20px 16px 12px;font-family:var(--font-h);font-size:.82rem;
+  font-weight:700;color:var(--a1);letter-spacing:.12em;text-transform:uppercase;
+  border-bottom:1px solid var(--border);flex-shrink:0
+}
+#queue-list{flex:1;overflow-y:auto;padding:6px 0}
+#queue-list::-webkit-scrollbar{width:3px}
+#queue-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.q-item{display:flex;gap:9px;align-items:center;padding:8px 13px;
+  border-bottom:1px solid rgba(255,255,255,0.04)}
+.q-num{font-size:.72rem;color:var(--text2);width:16px;flex-shrink:0;text-align:center}
+.q-thumb{width:46px;height:34px;object-fit:cover;border-radius:4px;flex-shrink:0}
+.q-texts{overflow:hidden;flex:1}
+.q-title{font-size:.79rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q-singer{font-size:.7rem;color:var(--a1)}
+.q-empty{padding:32px 16px;text-align:center;color:var(--text2);font-size:.88rem;line-height:1.7}
+
+/* ── Score overlay ────────────────────────────────────── */
+#score-overlay{
+  position:fixed;inset:0;z-index:50;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)
+}
+#score-overlay.show{display:flex}
+.score-card{
+  background:var(--glass);border:2px solid var(--a1);border-radius:26px;
+  padding:44px 60px;text-align:center;
+  box-shadow:var(--glow),0 0 60px rgba(0,0,0,0.6);
+  animation:scoreIn .5s cubic-bezier(0.34,1.56,0.64,1) both
+}
+@keyframes scoreIn{from{transform:scale(0.5) translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.score-singer{font-family:var(--font-b);font-size:1.05rem;color:var(--text2);margin-bottom:4px}
+.score-song{font-family:var(--font-b);font-size:1.35rem;font-weight:700;color:var(--text);margin-bottom:22px}
+.score-number{
+  font-family:var(--font-h);font-size:clamp(4rem,10vw,6.5rem);font-weight:900;
+  color:var(--a1);text-shadow:var(--glow)
+}
+.score-stars{font-size:2.4rem;margin-top:14px;letter-spacing:.1em}
+
+/* ── Toast ────────────────────────────────────────────── */
+#emoji-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:20;
+  display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast-item{
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:50px;padding:7px 16px;font-size:1.3rem;
+  backdrop-filter:blur(8px);
+  animation:toastIn .3s ease,toastOut .3s ease 2.4s forwards;
+  display:flex;align-items:center;gap:8px
+}
+.toast-name{font-size:.78rem;color:var(--text2)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-16px)}}
+</style>
+</head>
+<body class="theme-neon">
+
+<div id="scanlines"></div>
+<div id="vignette"></div>
+<div id="emoji-layer"></div>
+<div id="emoji-toast"></div>
+
+<!-- Click-to-activate overlay -->
+<div id="activate-overlay" class="hidden">
+  <div class="act-icon">👆</div>
+  <div class="act-text">TAP ANYWHERE TO START</div>
+  <div class="act-sub">Required to enable audio &amp; video playback</div>
+</div>
+
+<!-- Idle screen -->
+<div id="idle-screen">
+  <div class="logo">Cyber<span>KTV</span></div>
+  <div id="join-box">
+    <div id="qr-idle"></div>
+    <div class="join-info">
+      <div class="label">Join with code</div>
+      <div id="room-code-big">----</div>
+      <div class="url-hint">Go to <strong id="join-url-hint">…</strong></div>
+      <div class="url-hint">or scan QR code</div>
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- No-song screen -->
+<div id="no-song">
+  Queue is empty.<br>Add a song from your phone 📱
+</div>
+
+<!-- YouTube player — always in DOM, visibility toggled via z-index layer -->
+<div id="player-wrap">
+  <div id="yt-player"></div>
+</div>
+
+<!-- Room code badge — top LEFT -->
+<div id="room-badge"></div>
+
+<!-- QR badge — top RIGHT -->
+<div id="play-qr-wrap">
+  <div id="qr-play"></div>
+  <div class="qr-code-label">Scan to join</div>
+</div>
+
+<!-- Song info overlay -->
+<div id="song-info">
+  <div id="song-title">—</div>
+  <div id="singer-name">—</div>
+</div>
+
+<!-- Next-up card -->
+<div id="next-up">
+  <img id="next-thumb" src="" alt="">
+  <div class="next-texts">
+    <div class="next-label">Next Up</div>
+    <div class="next-title" id="next-title">—</div>
+    <div class="next-singer" id="next-singer">—</div>
+  </div>
+</div>
+
+<!-- Queue sidebar -->
+<div id="queue-sidebar">
+  <div class="sb-header">🎵 Up Next</div>
+  <div id="queue-list"><div class="q-empty">No upcoming songs</div></div>
+</div>
+
+<!-- Score overlay -->
+<div id="score-overlay">
+  <div class="score-card">
+    <div class="score-singer" id="sc-singer"></div>
+    <div class="score-song" id="sc-song"></div>
+    <div class="score-number" id="sc-number">0</div>
+    <div class="score-stars" id="sc-stars"></div>
+  </div>
+</div>
+
+<script src="/js/qrcode.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────────────────
+// Audio unlock (Chrome requires a user gesture before
+// any audio/video can play — including YouTube iframes)
+// ─────────────────────────────────────────────────────────
+let audioCtx = null;
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  // Unlock Web Audio
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  document.getElementById('activate-overlay').classList.add('hidden');
+
+  // If a video was already loaded but blocked, start it now
+  if (playerReady && player && state.currentSong) {
+    try { player.playVideo(); } catch (_) {}
+  }
+}
+
+// Show overlay after 1 second — operator clicks it once before guests arrive
+setTimeout(() => {
+  if (!audioUnlocked) document.getElementById('activate-overlay').classList.remove('hidden');
+}, 1000);
+
+document.addEventListener('click', unlockAudio, { once: false });
+document.addEventListener('touchstart', unlockAudio, { once: false });
+document.addEventListener('keydown', unlockAudio, { once: false });
+
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// ─────────────────────────────────────────────────────────
+// Synthesised emoji sounds
+// ─────────────────────────────────────────────────────────
+function sfxApplause() {
+  const ctx = getCtx(), dur = 2.2;
+  const buf = ctx.createBuffer(2, ctx.sampleRate * dur, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < d.length; i++) {
+      const t = i / ctx.sampleRate, phase = (t * 6.5) % 1;
+      const env = phase < 0.28 ? Math.sin((phase / 0.28) * Math.PI) ** 2 : 0;
+      d[i] = (Math.random() * 2 - 1) * env * (1 - t / dur) * 0.6;
+    }
+  }
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2800; f.Q.value = 1.5;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.7, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+  src.connect(f); f.connect(g); g.connect(ctx.destination); src.start();
+}
+function sfxLaughing() {
+  const ctx = getCtx();
+  for (let i = 0; i < 7; i++) {
+    const t = ctx.currentTime + i * 0.19;
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(360 + (i % 2) * 90, t);
+    osc.frequency.linearRampToValueAtTime(240, t + 0.15);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.28, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.17);
+    osc.connect(g); g.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
+  }
+}
+function sfxKiss() {
+  const ctx = getCtx();
+  [0, 250].forEach(delay => {
+    const t = ctx.currentTime + delay / 1000;
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1100, t);
+    osc.frequency.exponentialRampToValueAtTime(380, t + 0.09);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.35, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+    osc.connect(g); g.connect(ctx.destination); osc.start(t); osc.stop(t + 0.15);
+  });
+}
+function sfxCheering() {
+  const ctx = getCtx();
+  [261, 329, 392, 523, 659].forEach((freq, i) => {
+    const t = ctx.currentTime + i * 0.13;
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    g.gain.setValueAtTime(0.28, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    osc.connect(g); g.connect(ctx.destination); osc.start(t); osc.stop(t + 0.3);
+  });
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 1.2, ctx.sampleRate);
+  const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const ns = ctx.createBufferSource(); ns.buffer = buf;
+  const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1500; f.Q.value = 2;
+  const ng = ctx.createGain(); ng.gain.setValueAtTime(0.12, ctx.currentTime);
+  ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+  ns.connect(f); f.connect(ng); ng.connect(ctx.destination); ns.start();
+}
+function sfxFire() {
+  const ctx = getCtx();
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.7, ctx.sampleRate);
+  const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 280;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.45, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+  src.connect(f); f.connect(g); g.connect(ctx.destination); src.start();
+}
+function sfxMicDrop() {
+  const ctx = getCtx();
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.type = 'sine'; osc.frequency.setValueAtTime(180, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(25, ctx.currentTime + 0.35);
+  g.gain.setValueAtTime(0.7, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.42);
+  osc.connect(g); g.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.45);
+}
+const emojiSounds = { '👏': sfxApplause, '😂': sfxLaughing, '❤️': sfxKiss, '⭐': sfxCheering, '🔥': sfxFire, '🎤': sfxMicDrop };
+
+// ─────────────────────────────────────────────────────────
+// Emoji zoom-pop burst
+// ─────────────────────────────────────────────────────────
+function showEmojiPop(emoji, count = 7) {
+  const layer = document.getElementById('emoji-layer');
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('span');
+      el.className = 'emoji-burst';
+      el.textContent = emoji;
+      el.style.fontSize = (52 + Math.random() * 76) + 'px';
+      el.style.left = (6 + Math.random() * 88) + '%';
+      el.style.top = (10 + Math.random() * 78) + '%';
+      el.style.animationDuration = (1.2 + Math.random() * 0.55) + 's';
+      el.style.animationDelay = (Math.random() * 0.25) + 's';
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 2400);
+    }, i * 110);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// YouTube IFrame Player
+//
+// KEY RULES that keep it working:
+//  1. No `origin` param — local IPs break YouTube's validation
+//  2. No `enablejsapi` param — already implied by using the API
+//  3. Don't call loadVideoById in onReady — it races with the
+//     loadVideo() retry loop and double-loads
+//  4. Handle CUED (5) state only — not -1 (unstarted on init)
+// ─────────────────────────────────────────────────────────
+let player = null;
+let playerReady = false;
+let tickInterval = null;
+
+window.onYouTubeIframeAPIReady = function () {
+  player = new YT.Player('yt-player', {
+    width: '100%',
+    height: '100%',
+    playerVars: {
+      autoplay: 1,
+      controls: 0,
+      rel: 0,
+      modestbranding: 1,
+      iv_load_policy: 3,
+      fs: 0,
+      playsinline: 1,
+    },
+    events: {
+      onReady: () => {
+        playerReady = true;
+        applyVolume();
+        // loadVideo() retry loop will handle any pending song
+      },
+      onStateChange: (e) => {
+        const S = YT.PlayerState;
+        if (e.data === S.ENDED)   { socket.emit('song-ended'); stopTick(); }
+        if (e.data === S.PLAYING) { startTick(); }
+        if (e.data === S.PAUSED || e.data === S.BUFFERING) { stopTick(); }
+
+        // CUED (5): video is loaded but autoplay was blocked by browser policy.
+        // Only fire when we actually have a song (not on initial player creation).
+        if (e.data === S.CUED && state.currentSong && state.isPlaying) {
+          setTimeout(() => { try { player.playVideo(); } catch (_) {} }, 150);
+        }
+      },
+      onError: (e) => {
+        // Skip videos that are unavailable, private, or region-blocked
+        if ([2, 5, 100, 101, 150].includes(e.data)) {
+          console.warn('[YT] Unplayable video, skipping. Error:', e.data);
+          setTimeout(() => socket.emit('next-song'), 1500);
+        }
+      },
+    },
+  });
+};
+
+// Load YouTube API script
+(function () {
+  const s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(s);
+})();
+
+// Load a video by ID. Retries until player is ready.
+function loadVideo(videoId) {
+  if (!playerReady) {
+    setTimeout(() => loadVideo(videoId), 300);
+    return;
+  }
+  player.loadVideoById(videoId);
+  applyVolume();
+}
+
+function applyVolume() {
+  if (!playerReady || !player) return;
+  player.setVolume(state.isMuted ? 0 : state.volume);
+}
+
+function startTick() {
+  stopTick();
+  tickInterval = setInterval(() => {
+    if (!playerReady || !player) return;
+    socket.emit('time-update', {
+      currentTime: player.getCurrentTime?.() || 0,
+      duration: player.getDuration?.() || 0,
+    });
+  }, 800);
+}
+function stopTick() {
+  if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
+}
+
+// ─────────────────────────────────────────────────────────
+// QR code helpers
+// ─────────────────────────────────────────────────────────
+let joinUrl = '';
+function makeQR(container, size) {
+  if (!joinUrl) return;
+  container.innerHTML = '';
+  new QRCode(container, {
+    text: joinUrl, width: size, height: size,
+    colorDark: '#000000', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.L,
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// App state
+// ─────────────────────────────────────────────────────────
+let state = {
+  currentSong: null, isPlaying: false, queue: [],
+  volume: 80, theme: 'neon',
+  showPlaylist: true, showQR: false, showRoomCode: true,
+  showSongDetails: true, isMuted: false,
+};
+let roomCode = null;
+
+// Element refs
+const idleScreen   = document.getElementById('idle-screen');
+const playerWrap   = document.getElementById('player-wrap');
+const noSong       = document.getElementById('no-song');
+const songInfo     = document.getElementById('song-info');
+const songTitle    = document.getElementById('song-title');
+const singerName   = document.getElementById('singer-name');
+const nextUp       = document.getElementById('next-up');
+const roomBadge    = document.getElementById('room-badge');
+const playQrWrap   = document.getElementById('play-qr-wrap');
+const queueSidebar = document.getElementById('queue-sidebar');
+const queueList    = document.getElementById('queue-list');
+const scoreOverlay = document.getElementById('score-overlay');
+const emojiToast   = document.getElementById('emoji-toast');
+
+// ─────────────────────────────────────────────────────────
+// State application
+// ─────────────────────────────────────────────────────────
+function applyState(s) {
+  state = { ...state, ...s };
+  applyTheme(state.theme);
+
+  // Badges: driven by toggle state, independent of playback status
+  if (roomCode) roomBadge.textContent = roomCode;
+  roomBadge.classList.toggle('show', !!roomCode && state.showRoomCode);
+  playQrWrap.classList.toggle('show', state.showQR);
+
+  if (state.currentSong) {
+    idleScreen.style.display  = 'none';
+    noSong.style.display      = 'none';
+    playerWrap.style.zIndex   = '1';     // bring player layer forward
+    songTitle.textContent     = state.currentSong.title;
+    singerName.textContent    = state.currentSong.singerName;
+    applySongDetails(state.showSongDetails);
+  } else {
+    playerWrap.style.zIndex   = '-1';    // push player behind other screens
+    songInfo.classList.remove('hidden');
+    if (roomCode) {
+      idleScreen.style.display = 'none';
+      noSong.style.display     = 'flex';
+    }
+  }
+  updateNextUp();
+  updateQueue();
+  applySidebar(state.showPlaylist);
+}
+
+function applySongDetails(show) {
+  songInfo.classList.toggle('hidden', !show);
+}
+
+function applySidebar(open) {
+  queueSidebar.classList.toggle('open', open);
+  songInfo.classList.toggle('sidebar-open', open && state.showSongDetails);
+  updateNextUp();
+}
+
+function updateNextUp() {
+  const show = state.queue.length > 0 && !state.showPlaylist && state.currentSong;
+  nextUp.classList.toggle('show', !!show);
+  if (show) {
+    document.getElementById('next-thumb').src = state.queue[0].thumbnail;
+    document.getElementById('next-title').textContent = state.queue[0].title;
+    document.getElementById('next-singer').textContent = state.queue[0].singerName;
+  }
+}
+
+function updateQueue() {
+  if (!state.queue.length) {
+    queueList.innerHTML = '<div class="q-empty">No upcoming songs</div>';
+    return;
+  }
+  queueList.innerHTML = state.queue.map((s, i) => `
+    <div class="q-item">
+      <div class="q-num">${i + 1}</div>
+      <img class="q-thumb" src="${esc(s.thumbnail)}" alt="" loading="lazy">
+      <div class="q-texts">
+        <div class="q-title">${esc(s.title)}</div>
+        <div class="q-singer">🎤 ${esc(s.singerName)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function applyTheme(t) { document.body.className = `theme-${t}`; }
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showScore(data) {
+  document.getElementById('sc-singer').textContent = data.singerName;
+  document.getElementById('sc-song').textContent   = data.songTitle;
+  document.getElementById('sc-number').textContent = data.score;
+  document.getElementById('sc-stars').textContent  = '⭐'.repeat(data.stars) + '☆'.repeat(5 - data.stars);
+  scoreOverlay.classList.add('show');
+  showEmojiPop('⭐', 10);
+  setTimeout(() => scoreOverlay.classList.remove('show'), 4200);
+}
+
+function showToast(emoji, name) {
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.innerHTML = `${emoji} <span class="toast-name">${esc(name)}</span>`;
+  emojiToast.appendChild(el);
+  setTimeout(() => el.remove(), 2900);
+}
+
+// ─────────────────────────────────────────────────────────
+// Socket
+// ─────────────────────────────────────────────────────────
+const socket = io();
+socket.emit('create-room');
+
+socket.on('room-created', ({ roomCode: code, lanIP, port, publicUrl }) => {
+  roomCode = code;
+  document.getElementById('room-code-big').textContent = code;
+  // Production: publicUrl (from PUBLIC_URL env). LAN: detected IP. Fallback: page origin.
+  const base = publicUrl || (lanIP && lanIP !== 'localhost' ? `http://${lanIP}:${port}` : location.origin);
+  joinUrl = `${base}/mobile.html?room=${code}`;
+  const displayHost = publicUrl ? publicUrl.replace(/^https?:\/\//, '') : `${lanIP || location.hostname}:${port}`;
+  document.getElementById('join-url-hint').textContent = `${displayHost}/mobile.html`;
+  makeQR(document.getElementById('qr-idle'), 160);
+  makeQR(document.getElementById('qr-play'), 90);
+});
+
+socket.on('state-update', (s) => {
+  const prevId = state.currentSong?.videoId;
+  applyState(s);
+  if (s.currentSong && s.currentSong.videoId !== prevId) {
+    loadVideo(s.currentSong.videoId);
+  }
+});
+
+socket.on('queue-update', ({ queue }) => {
+  state.queue = queue;
+  updateQueue();
+  updateNextUp();
+});
+
+socket.on('playback-update', ({ isPlaying }) => {
+  state.isPlaying = isPlaying;
+  if (!playerReady) return;
+  if (isPlaying) player.playVideo(); else player.pauseVideo();
+});
+
+socket.on('do-seek', ({ time }) => {
+  if (playerReady) player.seekTo(time, true);
+});
+
+socket.on('volume-sync', ({ volume }) => { state.volume = volume; applyVolume(); });
+socket.on('mute-sync',   ({ muted })  => { state.isMuted = muted; applyVolume(); });
+socket.on('theme-changed', ({ theme }) => applyTheme(theme));
+
+socket.on('playlist-visibility',     ({ show }) => { state.showPlaylist    = show; applySidebar(show); });
+socket.on('qr-visibility',           ({ show }) => { state.showQR         = show; playQrWrap.classList.toggle('show', show); });
+socket.on('room-code-visibility',    ({ show }) => { state.showRoomCode   = show; if (roomCode) roomBadge.textContent = roomCode; roomBadge.classList.toggle('show', show && !!roomCode); });
+socket.on('song-details-visibility', ({ show }) => { state.showSongDetails = show; applySongDetails(show); });
+
+socket.on('current-singer-update', ({ singerName: n }) => {
+  if (state.currentSong) { state.currentSong.singerName = n; singerName.textContent = n; }
+});
+
+socket.on('emoji-reaction', ({ emoji, name }) => {
+  showEmojiPop(emoji);
+  if (audioUnlocked && emojiSounds[emoji]) emojiSounds[emoji]();
+  showToast(emoji, name);
+});
+
+socket.on('score-reveal', showScore);
+
+socket.on('toggle-fullscreen', () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+});
+
+socket.on('client-joined', ({ name }) => showToast('👋', `${name} joined`));
+</script>
+</body>
+</html>

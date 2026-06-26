@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CyberKTV">
+<meta name="theme-color" content="#060612">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon.svg">
+<title>CyberKTV Remote v1.2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ──────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;-webkit-text-size-adjust:100%}
+
+/* ── Themes ─────────────────────────────── */
+:root{
+  --bg:#060612;--bg2:#0d0d22;--bg3:#141430;
+  --a1:#00f5ff;--a2:#ff006e;
+  --text:#fff;--text2:#7788aa;
+  --border:rgba(0,245,255,0.16);--card:rgba(13,13,34,0.96);
+  --glow:0 0 14px rgba(0,245,255,0.28);
+  --nav-bg:rgba(8,8,28,0.84);--nav-border:rgba(255,255,255,0.1);
+  --btn-bg:rgba(0,245,255,0.1);--btn-border:rgba(0,245,255,0.3);
+  --active:#00f5ff;--tog-on:#00f5ff;--tog-off:rgba(255,255,255,0.15);
+  --font-h:'Orbitron',sans-serif;--font-b:'Inter',sans-serif;
+}
+body.theme-ktv{
+  --bg:#110000;--bg2:#1e0000;--bg3:#280000;
+  --a1:#ffd700;--a2:#ff3333;--text:#fff5e0;--text2:#996644;
+  --border:rgba(255,215,0,0.18);--card:rgba(30,0,0,0.96);
+  --glow:0 0 14px rgba(255,215,0,0.28);
+  --nav-bg:rgba(20,0,0,0.9);--nav-border:rgba(255,215,0,0.15);
+  --btn-bg:rgba(255,215,0,0.1);--btn-border:rgba(255,215,0,0.3);
+  --active:#ffd700;--tog-on:#ffd700;
+}
+body.theme-glass{
+  --bg:#141218;--bg2:#1d1b20;--bg3:#2d2c31;
+  --a1:#d0bcff;--a2:#f38fad;--text:#e6e1e5;--text2:#938f99;
+  --border:rgba(208,188,255,0.18);--card:#1d1b20;--glow:none;
+  --nav-bg:#2d2c31;--nav-border:rgba(255,255,255,0.08);
+  --btn-bg:rgba(208,188,255,0.1);--btn-border:rgba(208,188,255,0.22);
+  --active:#d0bcff;--tog-on:#d0bcff;
+}
+body.theme-retro{
+  --bg:#000;--bg2:#000800;--bg3:#001400;
+  --a1:#00ff41;--a2:#ffff00;--text:#00ff41;--text2:#007722;
+  --border:rgba(0,255,65,0.18);--card:rgba(0,10,0,0.96);--glow:0 0 10px rgba(0,255,65,0.38);
+  --nav-bg:rgba(0,8,0,0.94);--nav-border:rgba(0,255,65,0.2);
+  --btn-bg:rgba(0,255,65,0.08);--btn-border:rgba(0,255,65,0.25);
+  --active:#00ff41;--tog-on:#00ff41;
+  --font-h:'Share Tech Mono',monospace;--font-b:'Share Tech Mono',monospace;
+}
+
+/* ── Shell ──────────────────────────────── */
+body{display:flex;flex-direction:column;background:var(--bg);color:var(--text);font-family:var(--font-b);overflow:hidden;
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+#app{display:flex;flex-direction:column;height:100dvh;height:100vh}
+
+/* ── PWA Banner ─────────────────────────── */
+#install-banner{position:fixed;top:0;left:0;right:0;z-index:300;
+  background:linear-gradient(135deg,rgba(0,245,255,0.14),rgba(123,47,255,0.14));
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--nav-border);padding:10px 14px;display:none;
+  flex-direction:column;gap:8px}
+#install-banner.show{display:flex}
+#install-banner .ib-row{display:flex;align-items:center;gap:10px}
+#install-banner .ib-text{flex:1;font-size:.8rem;color:var(--text2);line-height:1.4}
+#install-banner .ib-text strong{color:var(--text);display:block}
+#install-banner .ib-steps{font-size:.75rem;color:var(--a1);line-height:1.7;
+  background:rgba(0,245,255,0.06);border-radius:8px;padding:6px 10px}
+#install-btn{background:var(--a1);color:var(--bg);border:none;border-radius:18px;
+  padding:6px 13px;font-size:.76rem;font-weight:700;cursor:pointer;flex-shrink:0}
+#install-dismiss{background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;padding:4px;flex-shrink:0}
+
+/* ── Join screen ────────────────────────── */
+#join-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;overflow-y:auto}
+.logo{font-family:var(--font-h);font-size:2rem;font-weight:900;color:var(--a1);letter-spacing:.15em;text-shadow:var(--glow)}
+.logo span{color:var(--a2)}
+.join-card{width:100%;max-width:380px;background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--glow)}
+.join-card h2{font-family:var(--font-h);font-size:.82rem;color:var(--text2);letter-spacing:.1em}
+.field label{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:4px}
+.field input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;color:var(--text);font-family:var(--font-b);font-size:1rem;outline:none;-webkit-appearance:none}
+.field input:focus{border-color:var(--a1)}
+.code-inp{font-family:var(--font-h)!important;font-size:1.6rem!important;letter-spacing:.4em!important;
+  text-align:center!important;text-transform:uppercase!important}
+.btn-primary{background:var(--a1);color:var(--bg);border:none;border-radius:11px;padding:13px;
+  font-family:var(--font-h);font-size:.84rem;font-weight:700;letter-spacing:.1em;
+  cursor:pointer;-webkit-appearance:none;width:100%}
+.btn-primary:active{opacity:.85}
+.err{font-size:.8rem;color:var(--a2);text-align:center;min-height:18px}
+
+/* ── Main screen ────────────────────────── */
+#main-screen{display:none;flex-direction:column;height:100%;min-height:0}
+#tab-panels{flex:1;overflow:hidden;position:relative;min-height:0}
+.panel{position:absolute;inset:0;overflow-y:auto;display:none;padding-bottom:90px}
+.panel.active{display:block}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ══ QUEUE ════════════════════════════════ */
+.q-empty{padding:44px 20px;text-align:center;color:var(--text2);line-height:2;font-size:.88rem}
+.q-item{display:flex;gap:10px;align-items:center;padding:9px 12px;
+  border-bottom:1px solid var(--border);background:var(--bg)}
+.q-thumb{width:52px;height:39px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--bg3)}
+.q-info{flex:1;overflow:hidden;min-width:0}
+.q-title{font-size:.83rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-singer-inp{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);
+  color:var(--a1);font-family:var(--font-b);font-size:.74rem;outline:none;padding:2px 0;margin-top:3px}
+.q-singer-inp::placeholder{color:var(--text2)}
+.q-btns{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.q-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:7px;
+  width:30px;height:24px;display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;cursor:pointer;color:var(--text)}
+.q-btn:active{opacity:.7}
+.q-btn:disabled{opacity:.22;cursor:default}
+.q-btn.del{border-color:rgba(255,80,80,.3);color:#ff5555;background:rgba(255,80,80,.07)}
+
+/* ══ ADD SONG ═════════════════════════════ */
+.srch-sticky{position:sticky;top:0;z-index:2;background:var(--bg2);
+  border-bottom:1px solid var(--border);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.srch-row{display:flex;gap:7px}
+.srch-inp{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;color:var(--text);font-family:var(--font-b);font-size:.92rem;outline:none;-webkit-appearance:none}
+.srch-inp:focus{border-color:var(--a1)}
+.icon-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:10px;
+  padding:10px 12px;color:var(--text);font-size:.92rem;cursor:pointer;flex-shrink:0}
+.url-lbl{font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.url-row{display:flex;gap:7px}
+.url-inp{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:9px 12px;color:var(--text);font-family:var(--font-b);font-size:.82rem;outline:none;-webkit-appearance:none}
+.url-inp:focus{border-color:var(--a1)}
+#search-status{padding:10px 12px;font-size:.8rem;color:var(--text2);text-align:center;min-height:34px;line-height:1.5}
+.r-item{display:flex;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--bg)}
+.r-thumb{width:68px;height:50px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer}
+.r-info{flex:1;overflow:hidden;cursor:pointer;min-width:0}
+.r-title{font-size:.85rem;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35}
+.r-meta{font-size:.71rem;color:var(--text2);margin-top:3px}
+.r-add{background:var(--a1);border:none;border-radius:8px;padding:8px 11px;color:var(--bg);
+  font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;
+  font-family:var(--font-h);letter-spacing:.04em}
+.r-add:active{opacity:.82}
+
+/* ══ CONTROL ══════════════════════════════ */
+/* Now playing */
+#ctrl-np{display:flex;gap:10px;align-items:center;padding:12px 14px;
+  background:var(--bg2);border-bottom:1px solid var(--border)}
+#ctrl-np-thumb{width:54px;height:40px;object-fit:cover;border-radius:7px;flex-shrink:0;background:var(--bg3)}
+.ctrl-np-text{flex:1;min-width:0}
+#ctrl-np-title{font-size:.88rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ctrl-np-singer{font-size:.74rem;color:var(--a1);margin-top:2px}
+/* Scrubber */
+.ctrl-scrub{padding:8px 14px 2px}
+#ctrl-scrubber{-webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
+  outline:none;cursor:pointer;
+  background:linear-gradient(to right,var(--a1) var(--cpct,0%),var(--bg3) var(--cpct,0%))}
+#ctrl-scrubber::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--a1);box-shadow:var(--glow);cursor:pointer}
+.ctrl-time{display:flex;justify-content:space-between;font-size:.67rem;color:var(--text2);padding:2px 14px 8px}
+/* Playback buttons */
+.pb-row{display:flex;align-items:center;justify-content:center;gap:16px;padding:6px 14px 10px}
+.pb-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:50%;
+  width:50px;height:50px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.1rem;color:var(--text);transition:transform .1s;flex-shrink:0}
+.pb-btn:active{transform:scale(.86)}
+.pb-btn.play{width:62px;height:62px;font-size:1.45rem;background:var(--a1);border-color:var(--a1);color:var(--bg)}
+/* Volume + mute */
+.ctrl-vol-row{display:flex;align-items:center;gap:8px;padding:4px 14px 12px}
+.v-icon{font-size:.9rem;color:var(--text2);flex-shrink:0}
+#ctrl-vol{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:2px;outline:none;cursor:pointer;
+  background:linear-gradient(to right,var(--a1) var(--vp,80%),var(--bg3) var(--vp,80%))}
+#ctrl-vol::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--a1);box-shadow:var(--glow);cursor:pointer}
+.mute-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:9px;
+  padding:8px 12px;font-size:.82rem;color:var(--text2);cursor:pointer;flex-shrink:0;white-space:nowrap}
+.mute-btn.on{color:var(--a2);border-color:rgba(255,80,80,.4);background:rgba(255,80,80,.08)}
+/* Section header */
+.s-hdr{font-size:.66rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;
+  padding:12px 14px 6px;border-top:1px solid var(--border)}
+.s-hdr:first-of-type{border-top:none}
+/* Score */
+#ctrl-score{display:none;margin:8px 14px;background:var(--card);border:1px solid var(--a1);
+  border-radius:13px;padding:14px;text-align:center;box-shadow:var(--glow)}
+#ctrl-score-singer{font-size:.76rem;color:var(--text2);margin-bottom:2px}
+#ctrl-score-val{font-family:var(--font-h);font-size:2.4rem;color:var(--a1);font-weight:900;text-shadow:var(--glow)}
+#ctrl-score-stars{font-size:1.3rem;margin-top:3px}
+/* Emoji grid */
+.emoji-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:10px 14px 14px}
+.emoji-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:13px;
+  padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .1s}
+.emoji-btn:active{transform:scale(.86)}
+.emoji-big{font-size:2rem;line-height:1}
+.emoji-lbl{font-size:.68rem;color:var(--text2)}
+/* Toggle rows */
+.tgl-row{display:flex;align-items:center;justify-content:space-between;
+  padding:13px 14px;border-bottom:1px solid var(--border);background:var(--bg);cursor:pointer}
+.tgl-row:active{background:var(--bg2)}
+.tgl-left{display:flex;align-items:center;gap:10px;font-size:.88rem;color:var(--text)}
+.tgl-icon{font-size:1.1rem;width:22px;text-align:center}
+.tgl-desc{font-size:.7rem;color:var(--text2);margin-top:1px}
+.tgl{width:42px;height:23px;border-radius:12px;background:var(--tog-off);position:relative;
+  transition:background .22s;flex-shrink:0;pointer-events:none}
+.tgl::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;
+  background:#fff;top:3px;left:3px;transition:left .22s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.tgl.on{background:var(--tog-on)}
+.tgl.on::after{left:22px}
+
+/* ══ PROFILE ══════════════════════════════ */
+.prof-hero{display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:24px 20px 18px;border-bottom:1px solid var(--border)}
+.avatar{width:70px;height:70px;border-radius:50%;background:var(--btn-bg);border:2px solid var(--a1);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-h);
+  font-size:1.5rem;color:var(--a1);font-weight:700;text-shadow:var(--glow);box-shadow:var(--glow)}
+.prof-name{font-size:1.1rem;font-weight:700;color:var(--text)}
+.prof-room{font-size:.8rem;color:var(--text2)}.hi{color:var(--a1);font-weight:600}
+.prof-row{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg)}
+.pr-k{font-size:.83rem;color:var(--text2)}.pr-v{font-size:.83rem;font-weight:600;color:var(--text)}
+.sec-hdr{font-size:.66rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;padding:12px 14px 8px}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 14px 14px}
+.tc{border-radius:12px;padding:13px 11px;cursor:pointer;border:2px solid transparent;
+  position:relative;transition:border-color .2s,transform .15s}
+.tc:active{transform:scale(.96)}.tc.active{border-color:var(--a1)!important}
+.tc-name{font-size:.8rem;font-weight:700;margin-bottom:2px}.tc-desc{font-size:.68rem;opacity:.65}
+.tc-chk{position:absolute;top:7px;right:8px;font-size:.9rem;display:none}.tc.active .tc-chk{display:block}
+.tc[data-t="neon"]{background:#060612;color:#00f5ff;border-color:rgba(0,245,255,0.15)}
+.tc[data-t="neon"] .tc-desc{color:#99aacc}
+.tc[data-t="ktv"]{background:#110000;color:#ffd700;border-color:rgba(255,215,0,0.15)}
+.tc[data-t="ktv"] .tc-desc{color:#996644}
+.tc[data-t="glass"]{background:linear-gradient(135deg,#1d1b20,#141218);color:#d0bcff;border-color:rgba(208,188,255,0.18)}
+.tc[data-t="glass"] .tc-desc{color:#938f99}
+.tc[data-t="retro"]{background:#000800;color:#00ff41;border-color:rgba(0,255,65,0.15)}
+.tc[data-t="retro"] .tc-desc{color:#007722}
+.act-btn{display:flex;align-items:center;gap:10px;margin:6px 14px 0;padding:13px 15px;
+  border:1px solid var(--border);border-radius:12px;background:var(--btn-bg);cursor:pointer}
+.act-btn:active{background:var(--btn-border)}
+.act-btn .ab-icon{font-size:1.1rem;flex-shrink:0}
+.act-btn .ab-main{font-size:.88rem;font-weight:600;color:var(--text)}
+.act-btn .ab-sub{font-size:.72rem;color:var(--text2);margin-top:2px}
+.danger-btn{display:flex;align-items:center;gap:10px;margin:6px 14px 0;padding:13px 15px;
+  border:1px solid rgba(255,80,80,.3);border-radius:12px;background:rgba(255,80,80,.07);cursor:pointer}
+.danger-btn:active{background:rgba(255,80,80,.15)}
+.danger-btn .ab-icon{font-size:1.1rem;flex-shrink:0}
+.danger-btn .ab-main{font-size:.88rem;font-weight:600;color:#ff5555}
+.danger-btn .ab-sub{font-size:.72rem;color:rgba(255,100,100,.6);margin-top:2px}
+.app-ver{text-align:center;padding:20px 14px;font-size:.7rem;color:var(--text2);opacity:.4}
+
+/* ── Floating glass nav ──────────────────── */
+#tab-bar{position:fixed;bottom:max(14px,env(safe-area-inset-bottom,14px));
+  left:50%;transform:translateX(-50%);
+  background:var(--nav-bg);
+  backdrop-filter:blur(28px) saturate(1.8);-webkit-backdrop-filter:blur(28px) saturate(1.8);
+  border:1px solid var(--nav-border);border-radius:28px;padding:5px;
+  display:flex;gap:2px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 0 0 0.5px rgba(255,255,255,.05);
+  z-index:100;width:calc(100% - 28px);max-width:420px}
+body.theme-glass #tab-bar{backdrop-filter:none;-webkit-backdrop-filter:none}
+.tab-btn{flex:1;padding:8px 4px;background:none;border:none;color:rgba(255,255,255,.3);
+  font-family:var(--font-b);font-size:.62rem;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:22px;transition:color .18s,background .18s}
+.tab-btn .ti{font-size:1.2rem;line-height:1}
+.tab-btn.active{background:rgba(255,255,255,.1);color:var(--active)}
+.tab-btn.active .ti{filter:drop-shadow(0 0 5px var(--active))}
+
+/* ── Modals ──────────────────────────────── */
+.modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);
+  backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
+.modal-backdrop.show{display:flex}
+.modal-sheet{background:var(--bg2);border:1px solid var(--border);border-radius:20px 20px 0 0;
+  padding:18px 16px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:480px;
+  animation:slideUp .28s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.modal-sheet h3{font-family:var(--font-h);font-size:.8rem;color:var(--a1);margin-bottom:10px;letter-spacing:.08em}
+#modal-thumb{width:100%;height:100px;object-fit:cover;border-radius:9px;margin-bottom:9px}
+#modal-title{font-size:.9rem;color:var(--text);font-weight:600;margin-bottom:3px;line-height:1.4}
+#modal-meta{font-size:.74rem;color:var(--text2);margin-bottom:12px}
+.modal-sheet label{font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px}
+.modal-sheet input[type=text]{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;
+  padding:10px 12px;color:var(--text);font-family:var(--font-b);font-size:.9rem;outline:none;-webkit-appearance:none;margin-bottom:12px}
+.modal-sheet input[type=text]:focus{border-color:var(--a1)}
+.modal-acts{display:flex;gap:9px}
+.btn-cancel{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:9px;
+  padding:11px;color:var(--text2);font-family:var(--font-b);font-size:.86rem;cursor:pointer}
+.btn-confirm{flex:2;background:var(--a1);border:none;border-radius:9px;padding:11px;
+  color:var(--bg);font-family:var(--font-h);font-size:.8rem;font-weight:700;cursor:pointer;letter-spacing:.06em}
+/* QR modal — centered */
+#qr-modal{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:24px}
+#qr-modal.show{display:flex}
+.qr-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;
+  padding:24px;text-align:center;width:100%;max-width:300px;box-shadow:var(--glow)}
+.qr-card h3{font-family:var(--font-h);font-size:.84rem;color:var(--a1);margin-bottom:6px;letter-spacing:.08em}
+.qr-card p{font-size:.78rem;color:var(--text2);margin-bottom:16px;line-height:1.5}
+#qr-share-box{width:200px;height:200px;background:#fff;border-radius:10px;margin:0 auto 12px;
+  overflow:hidden;display:flex;align-items:center;justify-content:center}
+.qr-url{font-size:.7rem;color:var(--text2);word-break:break-all;margin-bottom:14px;line-height:1.5}
+.btn-qr-close{background:var(--a1);color:var(--bg);border:none;border-radius:10px;padding:11px 24px;
+  font-family:var(--font-h);font-size:.8rem;font-weight:700;cursor:pointer;letter-spacing:.06em}
+
+/* ── Toast ───────────────────────────────── */
+#mob-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:var(--a1);color:var(--bg);border-radius:100px;padding:7px 18px;
+  font-size:.8rem;font-weight:700;z-index:250;pointer-events:none;opacity:0;
+  transition:opacity .25s;white-space:nowrap}
+#mob-toast.show{opacity:1}
+
+/* ── Responsive ──────────────────────────── */
+@media(min-width:600px){
+  #main-screen{max-width:560px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+  .emoji-grid{grid-template-columns:repeat(6,1fr)}
+  .theme-grid{grid-template-columns:repeat(4,1fr)}
+  #tab-bar{max-width:380px}
+}
+</style>
+</head>
+<body class="theme-neon">
+<div id="app">
+
+<!-- PWA Banner -->
+<div id="install-banner">
+  <div class="ib-row">
+    <div style="font-size:1.3rem;flex-shrink:0">📲</div>
+    <div class="ib-text"><strong>Add CyberKTV to Home Screen</strong>Use as a full-screen app</div>
+    <button id="install-btn" style="display:none">Install</button>
+    <button id="install-dismiss">✕</button>
+  </div>
+  <div class="ib-steps" id="install-steps"></div>
+</div>
+
+<!-- ══ JOIN SCREEN ════════════════════════ -->
+<div id="join-screen">
+  <div class="logo">Cyber<span>KTV</span></div>
+  <div class="join-card">
+    <h2>JOIN A ROOM</h2>
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="name-input" placeholder="Enter your name" maxlength="20" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Room Code</label>
+      <input type="text" id="code-input" class="code-inp" placeholder="ABCD" maxlength="4"
+        autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </div>
+    <div class="err" id="join-error"></div>
+    <button class="btn-primary" id="join-btn">JOIN ROOM</button>
+  </div>
+</div>
+
+<!-- ══ MAIN SCREEN ════════════════════════ -->
+<div id="main-screen">
+  <div id="tab-panels">
+
+    <!-- QUEUE -->
+    <div class="panel active" id="panel-queue">
+      <div id="queue-list">
+        <div class="q-empty">Queue is empty — add songs from the Add Song tab 🎵</div>
+      </div>
+    </div>
+
+    <!-- ADD SONG -->
+    <div class="panel" id="panel-search">
+      <div class="srch-sticky">
+        <div class="srch-row">
+          <input type="text" class="srch-inp" id="search-input" placeholder="Search for karaoke songs…" autocomplete="off">
+          <button class="icon-btn" id="search-btn">🔍</button>
+        </div>
+        <div>
+          <div class="url-lbl">Or paste YouTube URL / ID</div>
+          <div class="url-row">
+            <input type="text" class="url-inp" id="url-input" placeholder="https://youtube.com/watch?v=…" autocomplete="off">
+            <button class="icon-btn" id="url-btn">➕</button>
+          </div>
+        </div>
+      </div>
+      <div id="search-status">Search for songs or paste a YouTube URL above</div>
+      <div id="search-results"></div>
+    </div>
+
+    <!-- CONTROL -->
+    <div class="panel" id="panel-control">
+
+      <!-- Now Playing -->
+      <div id="ctrl-np">
+        <img id="ctrl-np-thumb" src="" alt="">
+        <div class="ctrl-np-text">
+          <div id="ctrl-np-title">No song playing</div>
+          <div id="ctrl-np-singer"></div>
+        </div>
+      </div>
+
+      <!-- Scrubber -->
+      <div class="ctrl-scrub">
+        <input type="range" id="ctrl-scrubber" min="0" max="1000" value="0">
+      </div>
+      <div class="ctrl-time">
+        <span id="ctrl-time-cur">0:00</span>
+        <span id="ctrl-time-dur">0:00</span>
+      </div>
+
+      <!-- Playback -->
+      <div class="pb-row">
+        <button class="pb-btn play" id="ctrl-play">▶</button>
+        <button class="pb-btn" id="ctrl-next" style="font-size:1rem">⏭</button>
+        <button class="pb-btn" id="ctrl-fs" title="Full Screen on TV" style="font-size:1rem">⛶</button>
+      </div>
+
+      <!-- Volume + Mute -->
+      <div class="ctrl-vol-row">
+        <span class="v-icon">🔈</span>
+        <input type="range" id="ctrl-vol" min="0" max="100" value="80">
+        <span class="v-icon">🔊</span>
+        <button class="mute-btn" id="ctrl-mute">🔇 Mute</button>
+      </div>
+
+      <!-- Score -->
+      <div id="ctrl-score">
+        <div id="ctrl-score-singer"></div>
+        <div id="ctrl-score-val">0</div>
+        <div id="ctrl-score-stars"></div>
+      </div>
+
+      <!-- Reactions -->
+      <div class="s-hdr" style="border-top:none;padding-top:4px">🎉 Reactions</div>
+      <div class="emoji-grid">
+        <button class="emoji-btn" data-emoji="👏"><div class="emoji-big">👏</div><div class="emoji-lbl">Applause</div></button>
+        <button class="emoji-btn" data-emoji="❤️"><div class="emoji-big">❤️</div><div class="emoji-lbl">Love</div></button>
+        <button class="emoji-btn" data-emoji="🔥"><div class="emoji-big">🔥</div><div class="emoji-lbl">Fire</div></button>
+        <button class="emoji-btn" data-emoji="😂"><div class="emoji-big">😂</div><div class="emoji-lbl">LOL</div></button>
+        <button class="emoji-btn" data-emoji="⭐"><div class="emoji-big">⭐</div><div class="emoji-lbl">Star</div></button>
+        <button class="emoji-btn" data-emoji="🎤"><div class="emoji-big">🎤</div><div class="emoji-lbl">Mic Drop</div></button>
+      </div>
+
+      <!-- TV Display Toggles -->
+      <div class="s-hdr">📺 TV Display</div>
+      <div class="tgl-row" data-evt="toggle-qr">
+        <div class="tgl-left">
+          <span class="tgl-icon">📲</span>
+          <div><div>Show QR Code</div><div class="tgl-desc">Top-right corner of TV</div></div>
+        </div>
+        <div class="tgl" id="ts-qr"></div>
+      </div>
+      <div class="tgl-row" data-evt="toggle-room-code">
+        <div class="tgl-left">
+          <span class="tgl-icon">🏷</span>
+          <div><div>Room Code</div><div class="tgl-desc">Top-left corner of TV</div></div>
+        </div>
+        <div class="tgl on" id="ts-roomcode"></div>
+      </div>
+      <div class="tgl-row" data-evt="toggle-song-details">
+        <div class="tgl-left">
+          <span class="tgl-icon">🎵</span>
+          <div><div>Song Details</div><div class="tgl-desc">Title &amp; singer overlay</div></div>
+        </div>
+        <div class="tgl on" id="ts-songdetails"></div>
+      </div>
+      <div class="tgl-row" data-evt="toggle-playlist">
+        <div class="tgl-left">
+          <span class="tgl-icon">📋</span>
+          <div><div>Queue Sidebar</div><div class="tgl-desc">Side list on TV</div></div>
+        </div>
+        <div class="tgl on" id="ts-playlist"></div>
+      </div>
+
+    </div><!-- /panel-control -->
+
+    <!-- PROFILE -->
+    <div class="panel" id="panel-profile">
+      <div class="prof-hero">
+        <div class="avatar" id="prof-avatar">?</div>
+        <div class="prof-name" id="prof-name">—</div>
+        <div class="prof-room">Room: <span class="hi" id="prof-room">—</span></div>
+      </div>
+
+      <div class="prof-row"><span class="pr-k">Room Code</span><span class="pr-v hi" id="pr-code">—</span></div>
+      <div class="prof-row"><span class="pr-k">Your Name</span><span class="pr-v" id="pr-name">—</span></div>
+      <div class="prof-row"><span class="pr-k">Server</span><span class="pr-v" id="pr-server" style="font-size:.72rem;color:var(--text2)">—</span></div>
+
+      <div class="sec-hdr">🎨 Theme</div>
+      <div class="theme-grid">
+        <div class="tc active" data-t="neon"><div class="tc-name">⚡ Neon</div><div class="tc-desc">Cyberpunk glow</div><div class="tc-chk">✓</div></div>
+        <div class="tc" data-t="ktv"><div class="tc-name">🏮 KTV</div><div class="tc-desc">Red &amp; gold</div><div class="tc-chk">✓</div></div>
+        <div class="tc" data-t="glass"><div class="tc-name">💜 Material</div><div class="tc-desc">Dark flat UI</div><div class="tc-chk">✓</div></div>
+        <div class="tc" data-t="retro"><div class="tc-name">👾 Retro</div><div class="tc-desc">Phosphor green</div><div class="tc-chk">✓</div></div>
+      </div>
+
+      <div class="sec-hdr" style="padding-top:4px">🔗 Share</div>
+      <div class="act-btn" id="share-qr-btn">
+        <span class="ab-icon">📷</span>
+        <div><div class="ab-main">Share QR Code</div><div class="ab-sub">Let others scan to join this room</div></div>
+      </div>
+
+      <div class="sec-hdr" style="padding-top:8px">🚪 Session</div>
+      <div class="danger-btn" id="quit-btn">
+        <span class="ab-icon">🚪</span>
+        <div><div class="ab-main">Leave Room</div><div class="ab-sub">Return to the join screen</div></div>
+      </div>
+
+      <div class="app-ver">CyberKTV v1.2 · Made with 🎤</div>
+    </div>
+
+  </div><!-- /tab-panels -->
+
+  <!-- Floating nav -->
+  <nav id="tab-bar">
+    <button class="tab-btn active" data-tab="queue"><div class="ti">📋</div>Queue</button>
+    <button class="tab-btn" data-tab="search"><div class="ti">🔍</div>Add Song</button>
+    <button class="tab-btn" data-tab="control"><div class="ti">🎛</div>Control</button>
+    <button class="tab-btn" data-tab="profile"><div class="ti">👤</div>Profile</button>
+  </nav>
+</div><!-- /main-screen -->
+</div><!-- /app -->
+
+<!-- Song Detail Modal -->
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal-sheet">
+    <h3>SONG DETAILS</h3>
+    <img id="modal-thumb" src="" alt="">
+    <div id="modal-title"></div>
+    <div id="modal-meta"></div>
+    <label>Singer Name</label>
+    <input type="text" id="modal-singer" placeholder="Your name" maxlength="30" autocomplete="off">
+    <div class="modal-acts">
+      <button class="btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="btn-confirm" id="modal-confirm">ADD TO QUEUE</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR Share Modal -->
+<div id="qr-modal">
+  <div class="qr-card">
+    <h3>📷 SCAN TO JOIN</h3>
+    <p>Share this QR so others can join the room from their phone</p>
+    <div id="qr-share-box"></div>
+    <div class="qr-url" id="qr-share-url"></div>
+    <button class="btn-qr-close" id="qr-close">Done</button>
+  </div>
+</div>
+
+<div id="mob-toast"></div>
+
+<script src="/js/qrcode.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+// ── PWA ──────────────────────────────────────────────────
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
+
+let deferredPrompt = null;
+
+// Detect platform
+const ua = navigator.userAgent;
+const isIOS = /iphone|ipad|ipod/i.test(ua);
+const isAndroid = /android/i.test(ua);
+const isSafari = /safari/i.test(ua) && !/chrome/i.test(ua);
+
+function showInstallBanner() {
+  if (isStandalone) return;
+  const banner = document.getElementById('install-banner');
+  const steps  = document.getElementById('install-steps');
+  const btn    = document.getElementById('install-btn');
+
+  if (deferredPrompt) {
+    // Android Chrome with beforeinstallprompt available — use native prompt
+    btn.style.display = 'block';
+    steps.textContent = '';
+  } else if (isIOS && isSafari) {
+    // iOS Safari: must use manual Add to Home Screen
+    btn.style.display = 'none';
+    steps.innerHTML = '1. Tap the <strong>Share</strong> button ↑ at the bottom of Safari<br>2. Scroll down and tap <strong>"Add to Home Screen"</strong>';
+  } else if (isAndroid) {
+    // Android but beforeinstallprompt hasn't fired (HTTP local network — normal)
+    btn.style.display = 'none';
+    steps.innerHTML = '1. Tap the <strong>⋮ menu</strong> in Chrome (top right)<br>2. Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>';
+  } else {
+    // Desktop or unknown — show generic instructions
+    btn.style.display = 'none';
+    steps.innerHTML = 'Open in Chrome/Safari on your phone → menu → <strong>Add to Home Screen</strong>';
+  }
+
+  banner.classList.add('show');
+}
+
+// Android Chrome over HTTPS — native prompt available
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(showInstallBanner, 2000);
+});
+
+// iOS Safari & Android HTTP — show manual instructions automatically
+if (!isStandalone && (isIOS || isAndroid) && !sessionStorage.getItem('pwa-dismissed')) {
+  // Delay so page is fully loaded before banner appears
+  setTimeout(() => { if (!deferredPrompt) showInstallBanner(); }, 2500);
+}
+
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('install-banner').classList.remove('show');
+  if (outcome === 'accepted') toast('CyberKTV installed! 🎉');
+});
+document.getElementById('install-dismiss').addEventListener('click', () => {
+  document.getElementById('install-banner').classList.remove('show');
+  deferredPrompt = null;
+  // Remember dismissal for this session so it doesn't re-appear
+  sessionStorage.setItem('pwa-dismissed', '1');
+});
+
+// ── Helpers ───────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(s) { s = Math.max(0, Math.floor(s||0)); return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`; }
+let toastTimer;
+function toast(msg, dur=2200) {
+  const el = document.getElementById('mob-toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ── App state ─────────────────────────────────────────────
+let myName = 'Guest', roomCode = null, joinUrl = '';
+let ctrlScrubbing = false;
+let appState = {
+  queue:[], currentSong:null, isPlaying:false, currentTime:0, duration:0,
+  volume:80, theme:'neon', showPlaylist:true, showQR:false,
+  showRoomCode:true, showSongDetails:true, isMuted:false
+};
+// Toggle state mirrors (for optimistic UI)
+const togState = { qr:false, roomcode:true, songdetails:true, playlist:true };
+
+// Pre-fill room code from URL param
+const urlParams = new URLSearchParams(location.search);
+if (urlParams.get('room')) document.getElementById('code-input').value = urlParams.get('room').toUpperCase();
+
+// ── Socket ────────────────────────────────────────────────
+const socket = io();
+
+// ── Join ──────────────────────────────────────────────────
+document.getElementById('join-btn').addEventListener('click', doJoin);
+['name-input','code-input'].forEach(id =>
+  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); }));
+
+function doJoin() {
+  const name = document.getElementById('name-input').value.trim() || 'Guest';
+  const code = document.getElementById('code-input').value.trim().toUpperCase();
+  if (code.length < 4) { showErr('Enter a 4-character room code'); return; }
+  myName = name;
+  socket.emit('join-room', { code, name });
+}
+function showErr(msg) {
+  const el = document.getElementById('join-error');
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.textContent = '', 3000);
+}
+
+socket.on('room-joined', ({ state: s, lanIP, port }) => {
+  roomCode = s.roomCode;
+  const base = lanIP && lanIP !== 'localhost' ? `http://${lanIP}:${port}` : location.origin;
+  joinUrl = `${base}/mobile.html?room=${s.roomCode}`;
+
+  // Populate profile
+  document.getElementById('prof-avatar').textContent = myName.charAt(0).toUpperCase();
+  document.getElementById('prof-name').textContent = myName;
+  document.getElementById('prof-room').textContent = s.roomCode;
+  document.getElementById('pr-code').textContent = s.roomCode;
+  document.getElementById('pr-name').textContent = myName;
+  document.getElementById('pr-server').textContent = (lanIP || location.hostname) + ':' + (port || 3000);
+
+  // Pre-fill singer field with user name
+  document.getElementById('modal-singer').value = myName;
+
+  // Switch screens
+  document.getElementById('join-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'flex';
+
+  applyState(s);
+
+  // Show PWA install prompt when accessed via QR scan
+  if (urlParams.get('room') && deferredPrompt)
+    setTimeout(() => document.getElementById('install-banner').classList.add('show'), 3000);
+});
+
+socket.on('join-error', ({ message }) => showErr(message));
+
+// ── State ─────────────────────────────────────────────────
+function applyState(s) {
+  appState = { ...appState, ...s };
+  applyTheme(appState.theme);
+  updateNP();
+  updateQueue();
+  setPlayBtn(appState.isPlaying);
+  setScrubber(appState.currentTime, appState.duration);
+  setVolUI(appState.volume);
+  setMuteUI(appState.isMuted);
+  setTog('qr', appState.showQR);
+  setTog('roomcode', appState.showRoomCode);
+  setTog('songdetails', appState.showSongDetails);
+  setTog('playlist', appState.showPlaylist);
+}
+
+function updateNP() {
+  const song = appState.currentSong;
+  const thumb = document.getElementById('ctrl-np-thumb');
+  const title = document.getElementById('ctrl-np-title');
+  const singer = document.getElementById('ctrl-np-singer');
+  if (song) {
+    thumb.src = song.thumbnail;
+    title.textContent = song.title;
+    singer.textContent = '🎤 ' + song.singerName;
+  } else {
+    thumb.src = '';
+    title.textContent = 'No song playing';
+    singer.textContent = '';
+  }
+}
+
+function setPlayBtn(playing) {
+  document.getElementById('ctrl-play').textContent = playing ? '⏸' : '▶';
+}
+
+function setScrubber(cur, dur) {
+  if (ctrlScrubbing) return;
+  const pct = dur > 0 ? (cur / dur) * 100 : 0;
+  const el = document.getElementById('ctrl-scrubber');
+  el.value = Math.round(pct * 10);
+  el.style.setProperty('--cpct', pct + '%');
+  document.getElementById('ctrl-time-cur').textContent = fmt(cur);
+  document.getElementById('ctrl-time-dur').textContent = fmt(dur);
+}
+
+function setVolUI(vol) {
+  const el = document.getElementById('ctrl-vol');
+  el.value = vol;
+  el.style.setProperty('--vp', vol + '%');
+}
+
+function setMuteUI(muted) {
+  appState.isMuted = muted;
+  const btn = document.getElementById('ctrl-mute');
+  btn.classList.toggle('on', muted);
+  btn.textContent = muted ? '🔊 Unmute' : '🔇 Mute';
+}
+
+function setTog(key, on) {
+  togState[key] = !!on;
+  const el = document.getElementById('ts-' + key);
+  if (el) el.classList.toggle('on', !!on);
+}
+
+function applyTheme(theme) {
+  document.body.className = 'theme-' + theme;
+  document.querySelectorAll('.tc').forEach(c => c.classList.toggle('active', c.dataset.t === theme));
+}
+
+// ── Queue panel ───────────────────────────────────────────
+function updateQueue() {
+  const list = document.getElementById('queue-list');
+  if (!appState.queue.length) {
+    list.innerHTML = '<div class="q-empty">Queue is empty — add songs from the Add Song tab 🎵</div>';
+    return;
+  }
+  list.innerHTML = appState.queue.map((s, i) => `
+    <div class="q-item" data-id="${esc(s.id)}">
+      <img class="q-thumb" src="${esc(s.thumbnail)}" alt="" loading="lazy">
+      <div class="q-info">
+        <div class="q-title">${esc(s.title)}</div>
+        <input class="q-singer-inp" value="${esc(s.singerName)}" placeholder="Singer name" data-id="${esc(s.id)}">
+      </div>
+      <div class="q-btns">
+        <button class="q-btn" data-dir="up" data-idx="${i}" ${i===0?'disabled':''}>▲</button>
+        <button class="q-btn" data-dir="dn" data-idx="${i}" ${i===appState.queue.length-1?'disabled':''}>▼</button>
+        <button class="q-btn del" data-id="${esc(s.id)}">✕</button>
+      </div>
+    </div>`).join('');
+
+  list.querySelectorAll('.q-singer-inp').forEach(inp =>
+    inp.addEventListener('change', () =>
+      socket.emit('update-singer', { songId: inp.dataset.id, singerName: inp.value })));
+
+  list.querySelectorAll('.q-btn[data-dir]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      const idx = parseInt(btn.dataset.idx);
+      const newIdx = btn.dataset.dir === 'up' ? idx - 1 : idx + 1;
+      if (newIdx < 0 || newIdx >= appState.queue.length) return;
+      const q = [...appState.queue];
+      [q[idx], q[newIdx]] = [q[newIdx], q[idx]];
+      appState.queue = q;
+      socket.emit('reorder-queue', { queue: q });
+      updateQueue();
+    }));
+
+  list.querySelectorAll('.q-btn.del').forEach(btn =>
+    btn.addEventListener('click', () => socket.emit('remove-song', { songId: btn.dataset.id })));
+}
+
+// ── Control tab ───────────────────────────────────────────
+document.getElementById('ctrl-play').addEventListener('click', () => socket.emit('play-pause'));
+document.getElementById('ctrl-next').addEventListener('click', () => socket.emit('next-song'));
+document.getElementById('ctrl-fs').addEventListener('click', () => {
+  socket.emit('toggle-fullscreen');
+  toast('Fullscreen toggled on TV ⛶');
+});
+
+// Scrubber
+const cScrEl = document.getElementById('ctrl-scrubber');
+cScrEl.addEventListener('pointerdown', () => { ctrlScrubbing = true; });
+cScrEl.addEventListener('input', () => {
+  const pct = parseInt(cScrEl.value) / 1000;
+  cScrEl.style.setProperty('--cpct', (pct * 100) + '%');
+  if (appState.duration > 0)
+    document.getElementById('ctrl-time-cur').textContent = fmt(pct * appState.duration);
+});
+cScrEl.addEventListener('pointerup', () => {
+  ctrlScrubbing = false;
+  socket.emit('seek', { time: (parseInt(cScrEl.value) / 1000) * appState.duration });
+});
+
+// Volume
+let volDebounce;
+document.getElementById('ctrl-vol').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  this.style.setProperty('--vp', v + '%');
+  clearTimeout(volDebounce);
+  volDebounce = setTimeout(() => socket.emit('volume-change', { volume: v }), 80);
+});
+
+// Mute
+document.getElementById('ctrl-mute').addEventListener('click', () => socket.emit('mute-toggle'));
+
+// Display toggles — each row emits its event directly
+document.querySelectorAll('.tgl-row[data-evt]').forEach(row =>
+  row.addEventListener('click', () => {
+    const evt = row.dataset.evt;
+    socket.emit(evt);
+    // Determine which key maps to this event for optimistic UI
+    const keyMap = { 'toggle-qr':'qr', 'toggle-room-code':'roomcode',
+                     'toggle-song-details':'songdetails', 'toggle-playlist':'playlist' };
+    const key = keyMap[evt];
+    if (key) setTog(key, !togState[key]);
+  }));
+
+// Emoji reactions
+document.querySelectorAll('.emoji-btn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    socket.emit('emoji-reaction', { emoji: btn.dataset.emoji });
+    btn.style.transform = 'scale(1.2)';
+    setTimeout(() => btn.style.transform = '', 200);
+  }));
+
+// ── Tab switching ─────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    const name = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  }));
+
+// ── Search ────────────────────────────────────────────────
+let srchDebounce;
+document.getElementById('search-input').addEventListener('input', () => {
+  clearTimeout(srchDebounce);
+  const q = document.getElementById('search-input').value.trim();
+  if (q.length < 2) return;
+  srchDebounce = setTimeout(() => doSearch(q), 500);
+});
+document.getElementById('search-btn').addEventListener('click', () => {
+  const q = document.getElementById('search-input').value.trim();
+  if (q) doSearch(q);
+});
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { const q = e.target.value.trim(); if (q) doSearch(q); }
+});
+
+function doSearch(q) {
+  document.getElementById('search-status').textContent = 'Searching…';
+  document.getElementById('search-results').innerHTML = '';
+  socket.emit('search-songs', { query: q });
+}
+
+socket.on('search-results', ({ results, error }) => {
+  const status = document.getElementById('search-status');
+  const box = document.getElementById('search-results');
+  if (error) { status.textContent = error; return; }
+  if (!results.length) { status.textContent = 'No results found.'; return; }
+  status.textContent = `${results.length} results — tap +Add to queue instantly, or tap title for details`;
+  window._sr = results;
+  box.innerHTML = results.map((v, i) => `
+    <div class="r-item">
+      <img class="r-thumb" src="${esc(v.thumbnail)}" alt="" loading="lazy" data-i="${i}">
+      <div class="r-info" data-i="${i}">
+        <div class="r-title">${esc(v.title)}</div>
+        <div class="r-meta">${esc(v.channel||'')}${v.duration?' · '+v.duration:''}</div>
+      </div>
+      <button class="r-add" data-i="${i}">+Add</button>
+    </div>`).join('');
+
+  // +Add: direct add, no popup, stay on page
+  box.querySelectorAll('.r-add').forEach(btn => btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const v = window._sr[btn.dataset.i];
+    socket.emit('add-song', { ...v, singerName: myName });
+    toast('Added: ' + v.title.slice(0, 30) + '… 🎵');
+  }));
+
+  // Tap thumbnail or title → detail popup with singer input
+  box.querySelectorAll('.r-thumb, .r-info').forEach(el => el.addEventListener('click', () =>
+    openDetail(window._sr[el.dataset.i])));
+});
+
+// URL paste
+document.getElementById('url-btn').addEventListener('click', doUrlFetch);
+document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') doUrlFetch(); });
+function doUrlFetch() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url) return;
+  document.getElementById('search-status').textContent = 'Fetching video info…';
+  socket.emit('get-video-info', { url });
+}
+socket.on('video-info-result', data => {
+  if (data.error) { document.getElementById('search-status').textContent = data.error; return; }
+  document.getElementById('search-status').textContent = '';
+  openDetail(data);
+});
+
+// ── Song detail popup ─────────────────────────────────────
+let pendingVideo = null;
+function openDetail(video) {
+  pendingVideo = video;
+  document.getElementById('modal-thumb').src = video.thumbnail;
+  document.getElementById('modal-title').textContent = video.title;
+  document.getElementById('modal-meta').textContent =
+    (video.channel || '') + (video.duration ? ' · ' + video.duration : '');
+  document.getElementById('modal-singer').value = myName;
+  document.getElementById('detail-modal').classList.add('show');
+  setTimeout(() => document.getElementById('modal-singer').focus(), 300);
+}
+document.getElementById('modal-cancel').addEventListener('click', closeDetail);
+document.getElementById('detail-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('detail-modal')) closeDetail();
+});
+function closeDetail() {
+  document.getElementById('detail-modal').classList.remove('show');
+  pendingVideo = null;
+}
+document.getElementById('modal-confirm').addEventListener('click', () => {
+  if (!pendingVideo) return;
+  socket.emit('add-song', { ...pendingVideo, singerName: document.getElementById('modal-singer').value.trim() || myName });
+  closeDetail();
+  toast('Added to queue! 🎵');
+});
+
+// ── Theme picker ──────────────────────────────────────────
+document.querySelectorAll('.tc').forEach(card =>
+  card.addEventListener('click', () => {
+    socket.emit('set-theme', { theme: card.dataset.t });
+    applyTheme(card.dataset.t);
+  }));
+
+// ── QR Share ──────────────────────────────────────────────
+let qrBuilt = false;
+document.getElementById('share-qr-btn').addEventListener('click', () => {
+  if (!joinUrl) { toast('Not connected to a room'); return; }
+  document.getElementById('qr-share-url').textContent = joinUrl;
+  if (!qrBuilt) {
+    document.getElementById('qr-share-box').innerHTML = '';
+    new QRCode(document.getElementById('qr-share-box'), {
+      text: joinUrl, width: 200, height: 200,
+      colorDark: '#000000', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.L
+    });
+    qrBuilt = true;
+  }
+  document.getElementById('qr-modal').classList.add('show');
+});
+document.getElementById('qr-close').addEventListener('click', () =>
+  document.getElementById('qr-modal').classList.remove('show'));
+document.getElementById('qr-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('qr-modal'))
+    document.getElementById('qr-modal').classList.remove('show');
+});
+
+// ── Leave Room ────────────────────────────────────────────
+document.getElementById('quit-btn').addEventListener('click', () => {
+  if (!confirm('Leave this room and return to the join screen?')) return;
+  leaveRoom();
+});
+
+function leaveRoom() {
+  socket.emit('quit-room');
+}
+
+socket.on('quit-confirmed', () => {
+  resetAndShowJoin();
+});
+
+function resetAndShowJoin() {
+  // Hide main, show join
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('join-screen').style.display = 'flex';
+
+  // Reset all local state
+  roomCode = null;
+  joinUrl = '';
+  qrBuilt = false;
+  appState = {
+    queue:[], currentSong:null, isPlaying:false, currentTime:0, duration:0,
+    volume:80, theme:'neon', showPlaylist:true, showQR:false,
+    showRoomCode:true, showSongDetails:true, isMuted:false
+  };
+
+  // Reset UI
+  applyTheme('neon');
+  document.getElementById('code-input').value = '';
+  document.getElementById('name-input').value = myName; // keep name for re-join
+  document.getElementById('join-error').textContent = '';
+  document.getElementById('qr-share-box').innerHTML = '';
+
+  // Reset nav to Queue tab
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'queue'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-queue'));
+
+  // Close any open modals
+  document.getElementById('detail-modal').classList.remove('show');
+  document.getElementById('qr-modal').classList.remove('show');
+}
+
+// ── Socket events ─────────────────────────────────────────
+socket.on('state-update', applyState);
+socket.on('queue-update', ({ queue }) => { appState.queue = queue; updateQueue(); });
+socket.on('playback-update', ({ isPlaying }) => { appState.isPlaying = isPlaying; setPlayBtn(isPlaying); });
+socket.on('time-update', ({ currentTime, duration }) => {
+  appState.currentTime = currentTime; appState.duration = duration;
+  setScrubber(currentTime, duration);
+});
+socket.on('volume-sync', ({ volume }) => { appState.volume = volume; setVolUI(volume); });
+socket.on('theme-changed', ({ theme }) => applyTheme(theme));
+socket.on('mute-sync', ({ muted }) => setMuteUI(muted));
+socket.on('qr-visibility', ({ show }) => setTog('qr', show));
+socket.on('room-code-visibility', ({ show }) => setTog('roomcode', show));
+socket.on('song-details-visibility', ({ show }) => setTog('songdetails', show));
+socket.on('playlist-visibility', ({ show }) => { appState.showPlaylist = show; setTog('playlist', show); });
+socket.on('current-singer-update', ({ singerName }) => {
+  if (appState.currentSong) { appState.currentSong.singerName = singerName; updateNP(); }
+});
+socket.on('score-reveal', data => {
+  document.getElementById('ctrl-score-singer').textContent = `${data.singerName} · ${data.songTitle}`;
+  document.getElementById('ctrl-score-val').textContent = data.score;
+  document.getElementById('ctrl-score-stars').textContent = '⭐'.repeat(data.stars) + '☆'.repeat(5 - data.stars);
+  document.getElementById('ctrl-score').style.display = 'block';
+  setTimeout(() => document.getElementById('ctrl-score').style.display = 'none', 6000);
+  document.querySelector('.tab-btn[data-tab="control"]').click();
+});
+socket.on('disconnect', () => toast('Connection lost — reconnecting…', 4000));
+socket.on('connect', () => {
+  // Only show reconnect toast when we are in a room (main screen visible)
+  if (document.getElementById('main-screen').style.display !== 'none' && roomCode) {
+    toast('Reconnected ✓');
+  }
+});
+</script>
+</body>
+</html>
