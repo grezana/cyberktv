@@ -30,7 +30,11 @@ const PUBLIC_URL = process.env.PUBLIC_URL
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+const io = new Server(server, {
+  cors: { origin: '*' },
+  pingTimeout: 5000,   // detect dead connections within ~5s (default is 20s)
+  pingInterval: 3000,
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => res.redirect('/tv.html'));
@@ -67,10 +71,11 @@ function newRoom(code) {
     volume: 80,
     theme: 'neon',
     showPlaylist: true,
-    showQR: false,
+    showQR: true,
     showRoomCode: true,
     showSongDetails: true,
     isMuted: false,
+    clientCount: 0,
   };
 }
 
@@ -134,13 +139,16 @@ io.on('connection', (socket) => {
       socket.emit('join-error', { message: 'Room not found. Check the code and try again.' });
       return;
     }
+    const isRejoin = roomCode === upper; // same socket already counted — sync button or re-emit
     roomCode = upper;
     userName = (name || 'Guest').trim().slice(0, 20) || 'Guest';
     isTV = false;
     socket.join(roomCode);
+    if (!isRejoin) room.clientCount = (room.clientCount || 0) + 1;
     socket.emit('room-joined', { state: publicState(room), lanIP: LAN_IP, port: PORT });
     io.to(room.tvSocketId).emit('client-joined', { name: userName });
-    console.log(`[${roomCode}] ${userName} joined`);
+    io.to(roomCode).emit('client-count', { count: room.clientCount });
+    console.log(`[${roomCode}] ${userName} ${isRejoin ? 're-synced' : 'joined'} (${room.clientCount} guests)`);
   });
 
   // ── Search songs ──────────────────────────────────────────────
@@ -213,6 +221,8 @@ io.on('connection', (socket) => {
       room.queue.push(song);
       io.to(roomCode).emit('queue-update', { queue: room.queue });
     }
+    // Notify everyone (especially TV) that a song was just added
+    io.to(room.tvSocketId).emit('song-added', { title: song.title, singerName: song.singerName });
   });
 
   socket.on('reorder-queue', ({ queue }) => {
@@ -282,12 +292,6 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('emoji-reaction', { emoji, name: userName });
   });
 
-  socket.on('toggle-fullscreen', () => {
-    const room = rooms.get(roomCode);
-    if (!room) return;
-    io.to(room.tvSocketId).emit('toggle-fullscreen');
-  });
-
   socket.on('toggle-playlist', () => {
     const room = rooms.get(roomCode);
     if (!room) return;
@@ -295,18 +299,15 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('playlist-visibility', { show: room.showPlaylist });
   });
 
-  socket.on('toggle-qr', () => {
+  // Combined QR + room-code toggle (both always in sync)
+  socket.on('toggle-qr-room', () => {
     const room = rooms.get(roomCode);
     if (!room) return;
-    room.showQR = !room.showQR;
-    io.to(roomCode).emit('qr-visibility', { show: room.showQR });
-  });
-
-  socket.on('toggle-room-code', () => {
-    const room = rooms.get(roomCode);
-    if (!room) return;
-    room.showRoomCode = !room.showRoomCode;
-    io.to(roomCode).emit('room-code-visibility', { show: room.showRoomCode });
+    const newVal = !room.showRoomCode;
+    room.showQR = newVal;
+    room.showRoomCode = newVal;
+    io.to(roomCode).emit('qr-visibility', { show: newVal });
+    io.to(roomCode).emit('room-code-visibility', { show: newVal });
   });
 
   socket.on('toggle-song-details', () => {
@@ -364,6 +365,14 @@ io.on('connection', (socket) => {
           console.log(`[${roomCode}] Room cleaned up (TV disconnected)`);
         }
       }, 30000);
+    } else if (roomCode && !isTV) {
+      const room = rooms.get(roomCode);
+      if (room) {
+        room.clientCount = Math.max(0, (room.clientCount || 1) - 1);
+        io.to(roomCode).emit('client-count', { count: room.clientCount });
+        io.to(room.tvSocketId).emit('client-left', { name: userName });
+        console.log(`[${roomCode}] ${userName} left (${room.clientCount} guests)`);
+      }
     }
   });
 

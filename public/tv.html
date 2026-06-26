@@ -123,30 +123,24 @@ body{font-family:var(--font-b);color:var(--text);background:var(--bg);position:r
   font-family:var(--font-h);font-size:1.3rem;color:var(--text2);text-align:center;line-height:2
 }
 
-/* ── Top corner badges ────────────────────────────────── */
-#room-badge{
+/* ── Combined corner badge (top-left) ─────────────────── */
+#corner-badge{
   position:fixed;top:16px;left:16px;z-index:16;
+  display:none;align-items:center;gap:10px;
   background:var(--glass);border:1px solid var(--border);
-  border-radius:10px;padding:8px 16px;
-  backdrop-filter:blur(12px);
-  font-family:var(--font-h);font-size:1rem;font-weight:700;
-  color:var(--a1);letter-spacing:.22em;
-  box-shadow:var(--glow);display:none;
+  border-radius:14px;padding:8px 14px 8px 8px;
+  backdrop-filter:blur(12px);box-shadow:var(--glow);
 }
-#room-badge.show{display:block}
-#play-qr-wrap{
-  position:fixed;top:16px;right:16px;z-index:16;
-  background:var(--glass);border:1px solid var(--border);
-  border-radius:12px;padding:6px;
-  backdrop-filter:blur(12px);
-  box-shadow:var(--glow);display:none;
-  flex-direction:column;align-items:center;gap:4px;
-}
-#play-qr-wrap.show{display:flex}
-#qr-play{border-radius:6px;width:90px;height:90px;
-  background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
-#qr-play img,#qr-play canvas{width:90px!important;height:90px!important}
-.qr-code-label{font-size:.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
+#corner-badge.show{display:flex}
+#corner-qr{width:68px;height:68px;background:#fff;border-radius:7px;
+  overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#corner-qr img,#corner-qr canvas{width:68px!important;height:68px!important}
+#corner-qr.hide{display:none}
+.corner-info{display:flex;flex-direction:column;gap:2px}
+.corner-label{font-size:.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1em}
+#corner-code{font-family:var(--font-h);font-size:1.1rem;font-weight:700;
+  color:var(--a1);letter-spacing:.22em;text-shadow:var(--glow)}
+.corner-sub{font-size:.6rem;color:var(--text2)}
 
 /* ── Song info overlay ────────────────────────────────── */
 #song-info{
@@ -208,6 +202,11 @@ body{font-family:var(--font-b);color:var(--text);background:var(--bg);position:r
 .q-title{font-size:.79rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .q-singer{font-size:.7rem;color:var(--a1)}
 .q-empty{padding:32px 16px;text-align:center;color:var(--text2);font-size:.88rem;line-height:1.7}
+/* Sidebar footer — client count */
+#sb-footer{
+  padding:10px 16px;border-top:1px solid var(--border);flex-shrink:0;
+  text-align:center;font-size:.72rem;color:var(--text2);
+}
 
 /* ── Score overlay ────────────────────────────────────── */
 #score-overlay{
@@ -244,6 +243,32 @@ body{font-family:var(--font-b);color:var(--text);background:var(--bg);position:r
 .toast-name{font-size:.78rem;color:var(--text2)}
 @keyframes toastIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
 @keyframes toastOut{to{opacity:0;transform:translateY(-16px)}}
+
+/* ── Song-added banner ────────────────────────────────── */
+#song-added-banner{
+  position:fixed;top:0;left:0;right:0;z-index:80;
+  display:flex;justify-content:center;pointer-events:none;
+}
+.sa-card{
+  margin-top:18px;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:16px;padding:10px 20px 10px 14px;
+  backdrop-filter:blur(18px) saturate(1.6);
+  box-shadow:0 4px 28px rgba(0,0,0,.55), 0 0 24px rgba(0,245,255,.15);
+  display:flex;align-items:center;gap:12px;max-width:520px;
+  animation:saBannerIn .38s cubic-bezier(.34,1.3,.64,1),
+            saBannerOut .32s ease 3.8s forwards;
+}
+body.theme-ktv   .sa-card{box-shadow:0 4px 28px rgba(0,0,0,.55),0 0 24px rgba(255,215,0,.18)}
+body.theme-glass .sa-card{box-shadow:0 4px 28px rgba(0,0,0,.45),0 0 24px rgba(208,188,255,.15)}
+body.theme-retro .sa-card{box-shadow:0 4px 28px rgba(0,0,0,.55),0 0 24px rgba(0,255,65,.2)}
+.sa-thumb{width:52px;height:38px;object-fit:cover;border-radius:6px;flex-shrink:0}
+.sa-texts{overflow:hidden;display:flex;flex-direction:column;gap:2px}
+.sa-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--a2);font-weight:700;font-family:var(--font-h)}
+.sa-title{font-size:.88rem;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+.sa-singer{font-size:.75rem;color:var(--a1)}
+@keyframes saBannerIn{from{opacity:0;transform:translateY(-60px)}to{opacity:1;transform:none}}
+@keyframes saBannerOut{to{opacity:0;transform:translateY(-24px)}}
 </style>
 </head>
 <body class="theme-neon">
@@ -252,15 +277,16 @@ body{font-family:var(--font-b);color:var(--text);background:var(--bg);position:r
 <div id="vignette"></div>
 <div id="emoji-layer"></div>
 <div id="emoji-toast"></div>
+<div id="song-added-banner"></div>
 
-<!-- Click-to-activate overlay -->
+<!-- Idle screen -->
+<!-- Click-to-activate overlay: one tap unlocks Chrome audio/video autoplay for this session -->
 <div id="activate-overlay" class="hidden">
   <div class="act-icon">👆</div>
   <div class="act-text">TAP ANYWHERE TO START</div>
   <div class="act-sub">Required to enable audio &amp; video playback</div>
 </div>
 
-<!-- Idle screen -->
 <div id="idle-screen">
   <div class="logo">Cyber<span>KTV</span></div>
   <div id="join-box">
@@ -285,13 +311,14 @@ body{font-family:var(--font-b);color:var(--text);background:var(--bg);position:r
   <div id="yt-player"></div>
 </div>
 
-<!-- Room code badge — top LEFT -->
-<div id="room-badge"></div>
-
-<!-- QR badge — top RIGHT -->
-<div id="play-qr-wrap">
-  <div id="qr-play"></div>
-  <div class="qr-code-label">Scan to join</div>
+<!-- Combined corner badge — top LEFT (QR + room code together) -->
+<div id="corner-badge">
+  <div id="corner-qr"></div>
+  <div class="corner-info">
+    <div class="corner-label">Room Code</div>
+    <div id="corner-code">----</div>
+    <div class="corner-sub">Scan to join</div>
+  </div>
 </div>
 
 <!-- Song info overlay -->
@@ -314,6 +341,7 @@ body{font-family:var(--font-b);color:var(--text);background:var(--bg);position:r
 <div id="queue-sidebar">
   <div class="sb-header">🎵 Up Next</div>
   <div id="queue-list"><div class="q-empty">No upcoming songs</div></div>
+  <div id="sb-footer">👥 <span id="client-count-text">0 guests online</span></div>
 </div>
 
 <!-- Score overlay -->
@@ -332,42 +360,41 @@ body{font-family:var(--font-b);color:var(--text);background:var(--bg);position:r
 'use strict';
 
 // ─────────────────────────────────────────────────────────
-// Audio unlock (Chrome requires a user gesture before
-// any audio/video can play — including YouTube iframes)
+// Audio unlock — one tap on TV gives Chrome the gesture it
+// needs to allow autoplay for the entire session.
 // ─────────────────────────────────────────────────────────
 let audioCtx = null;
 let audioUnlocked = false;
-
-function unlockAudio() {
-  if (audioUnlocked) return;
-  audioUnlocked = true;
-
-  // Unlock Web Audio
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-
-  document.getElementById('activate-overlay').classList.add('hidden');
-
-  // If a video was already loaded but blocked, start it now
-  if (playerReady && player && state.currentSong) {
-    try { player.playVideo(); } catch (_) {}
-  }
-}
-
-// Show overlay after 1 second — operator clicks it once before guests arrive
-setTimeout(() => {
-  if (!audioUnlocked) document.getElementById('activate-overlay').classList.remove('hidden');
-}, 1000);
-
-document.addEventListener('click', unlockAudio, { once: false });
-document.addEventListener('touchstart', unlockAudio, { once: false });
-document.addEventListener('keydown', unlockAudio, { once: false });
 
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  document.getElementById('activate-overlay').classList.add('hidden');
+
+  // If a song was queued before the tap (mobile was fast), start it now
+  if (playerReady && player && state.currentSong && state.isPlaying) {
+    try { player.playVideo(); } catch (_) {}
+  }
+}
+
+// Show overlay after 1 second — operator taps once before guests arrive
+setTimeout(() => {
+  if (!audioUnlocked) document.getElementById('activate-overlay').classList.remove('hidden');
+}, 1000);
+
+document.addEventListener('click',      unlockAudio, { capture: true });
+document.addEventListener('touchstart', unlockAudio, { capture: true });
+document.addEventListener('keydown',    unlockAudio, { capture: true });
 
 // ─────────────────────────────────────────────────────────
 // Synthesised emoji sounds
@@ -442,16 +469,7 @@ function sfxFire() {
   g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
   src.connect(f); f.connect(g); g.connect(ctx.destination); src.start();
 }
-function sfxMicDrop() {
-  const ctx = getCtx();
-  const osc = ctx.createOscillator(), g = ctx.createGain();
-  osc.type = 'sine'; osc.frequency.setValueAtTime(180, ctx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(25, ctx.currentTime + 0.35);
-  g.gain.setValueAtTime(0.7, ctx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.42);
-  osc.connect(g); g.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.45);
-}
-const emojiSounds = { '👏': sfxApplause, '😂': sfxLaughing, '❤️': sfxKiss, '⭐': sfxCheering, '🔥': sfxFire, '🎤': sfxMicDrop };
+const emojiSounds = { '👏': sfxApplause, '😂': sfxLaughing, '❤️': sfxKiss, '⭐': sfxCheering, '🔥': sfxFire };
 
 // ─────────────────────────────────────────────────────────
 // Emoji zoom-pop burst
@@ -476,13 +494,6 @@ function showEmojiPop(emoji, count = 7) {
 
 // ─────────────────────────────────────────────────────────
 // YouTube IFrame Player
-//
-// KEY RULES that keep it working:
-//  1. No `origin` param — local IPs break YouTube's validation
-//  2. No `enablejsapi` param — already implied by using the API
-//  3. Don't call loadVideoById in onReady — it races with the
-//     loadVideo() retry loop and double-loads
-//  4. Handle CUED (5) state only — not -1 (unstarted on init)
 // ─────────────────────────────────────────────────────────
 let player = null;
 let playerReady = false;
@@ -505,22 +516,18 @@ window.onYouTubeIframeAPIReady = function () {
       onReady: () => {
         playerReady = true;
         applyVolume();
-        // loadVideo() retry loop will handle any pending song
       },
       onStateChange: (e) => {
         const S = YT.PlayerState;
         if (e.data === S.ENDED)   { socket.emit('song-ended'); stopTick(); }
         if (e.data === S.PLAYING) { startTick(); }
         if (e.data === S.PAUSED || e.data === S.BUFFERING) { stopTick(); }
-
-        // CUED (5): video is loaded but autoplay was blocked by browser policy.
-        // Only fire when we actually have a song (not on initial player creation).
+        // CUED fires when browser policy held the video back — retry play from state-change context
         if (e.data === S.CUED && state.currentSong && state.isPlaying) {
           setTimeout(() => { try { player.playVideo(); } catch (_) {} }, 150);
         }
       },
       onError: (e) => {
-        // Skip videos that are unavailable, private, or region-blocked
         if ([2, 5, 100, 101, 150].includes(e.data)) {
           console.warn('[YT] Unplayable video, skipping. Error:', e.data);
           setTimeout(() => socket.emit('next-song'), 1500);
@@ -530,26 +537,27 @@ window.onYouTubeIframeAPIReady = function () {
   });
 };
 
-// Load YouTube API script
 (function () {
   const s = document.createElement('script');
   s.src = 'https://www.youtube.com/iframe_api';
   document.head.appendChild(s);
 })();
 
-// Load a video by ID. Retries until player is ready.
 function loadVideo(videoId) {
-  if (!playerReady) {
-    setTimeout(() => loadVideo(videoId), 300);
-    return;
-  }
+  if (!playerReady) { setTimeout(() => loadVideo(videoId), 300); return; }
   player.loadVideoById(videoId);
   applyVolume();
 }
 
 function applyVolume() {
   if (!playerReady || !player) return;
-  player.setVolume(state.isMuted ? 0 : state.volume);
+  if (state.isMuted) {
+    player.mute();
+    player.setVolume(0);
+  } else {
+    player.unMute();
+    player.setVolume(state.volume);
+  }
 }
 
 function startTick() {
@@ -570,6 +578,8 @@ function stopTick() {
 // QR code helpers
 // ─────────────────────────────────────────────────────────
 let joinUrl = '';
+let cornerQrBuilt = false;
+
 function makeQR(container, size) {
   if (!joinUrl) return;
   container.innerHTML = '';
@@ -586,7 +596,7 @@ function makeQR(container, size) {
 let state = {
   currentSong: null, isPlaying: false, queue: [],
   volume: 80, theme: 'neon',
-  showPlaylist: true, showQR: false, showRoomCode: true,
+  showPlaylist: true, showQR: true, showRoomCode: true,
   showSongDetails: true, isMuted: false,
 };
 let roomCode = null;
@@ -599,8 +609,9 @@ const songInfo     = document.getElementById('song-info');
 const songTitle    = document.getElementById('song-title');
 const singerName   = document.getElementById('singer-name');
 const nextUp       = document.getElementById('next-up');
-const roomBadge    = document.getElementById('room-badge');
-const playQrWrap   = document.getElementById('play-qr-wrap');
+const cornerBadge  = document.getElementById('corner-badge');
+const cornerCode   = document.getElementById('corner-code');
+const cornerQr     = document.getElementById('corner-qr');
 const queueSidebar = document.getElementById('queue-sidebar');
 const queueList    = document.getElementById('queue-list');
 const scoreOverlay = document.getElementById('score-overlay');
@@ -609,24 +620,27 @@ const emojiToast   = document.getElementById('emoji-toast');
 // ─────────────────────────────────────────────────────────
 // State application
 // ─────────────────────────────────────────────────────────
+function updateCornerBadge() {
+  const showBadge = !!roomCode && (state.showRoomCode || state.showQR);
+  cornerBadge.classList.toggle('show', showBadge);
+  cornerQr.classList.toggle('hide', !state.showQR);
+  if (roomCode) cornerCode.textContent = roomCode;
+}
+
 function applyState(s) {
   state = { ...state, ...s };
   applyTheme(state.theme);
-
-  // Badges: driven by toggle state, independent of playback status
-  if (roomCode) roomBadge.textContent = roomCode;
-  roomBadge.classList.toggle('show', !!roomCode && state.showRoomCode);
-  playQrWrap.classList.toggle('show', state.showQR);
+  updateCornerBadge();
 
   if (state.currentSong) {
     idleScreen.style.display  = 'none';
     noSong.style.display      = 'none';
-    playerWrap.style.zIndex   = '1';     // bring player layer forward
+    playerWrap.style.zIndex   = '1';
     songTitle.textContent     = state.currentSong.title;
     singerName.textContent    = state.currentSong.singerName;
     applySongDetails(state.showSongDetails);
   } else {
-    playerWrap.style.zIndex   = '-1';    // push player behind other screens
+    playerWrap.style.zIndex   = '-1';
     songInfo.classList.remove('hidden');
     if (roomCode) {
       idleScreen.style.display = 'none';
@@ -708,13 +722,15 @@ socket.emit('create-room');
 socket.on('room-created', ({ roomCode: code, lanIP, port, publicUrl }) => {
   roomCode = code;
   document.getElementById('room-code-big').textContent = code;
-  // Production: publicUrl (from PUBLIC_URL env). LAN: detected IP. Fallback: page origin.
+  cornerCode.textContent = code;
   const base = publicUrl || (lanIP && lanIP !== 'localhost' ? `http://${lanIP}:${port}` : location.origin);
   joinUrl = `${base}/mobile.html?room=${code}`;
   const displayHost = publicUrl ? publicUrl.replace(/^https?:\/\//, '') : `${lanIP || location.hostname}:${port}`;
   document.getElementById('join-url-hint').textContent = `${displayHost}/mobile.html`;
   makeQR(document.getElementById('qr-idle'), 160);
-  makeQR(document.getElementById('qr-play'), 90);
+  makeQR(cornerQr, 68);
+  cornerQrBuilt = true;
+  updateCornerBadge();
 });
 
 socket.on('state-update', (s) => {
@@ -745,10 +761,18 @@ socket.on('volume-sync', ({ volume }) => { state.volume = volume; applyVolume();
 socket.on('mute-sync',   ({ muted })  => { state.isMuted = muted; applyVolume(); });
 socket.on('theme-changed', ({ theme }) => applyTheme(theme));
 
-socket.on('playlist-visibility',     ({ show }) => { state.showPlaylist    = show; applySidebar(show); });
-socket.on('qr-visibility',           ({ show }) => { state.showQR         = show; playQrWrap.classList.toggle('show', show); });
-socket.on('room-code-visibility',    ({ show }) => { state.showRoomCode   = show; if (roomCode) roomBadge.textContent = roomCode; roomBadge.classList.toggle('show', show && !!roomCode); });
-socket.on('song-details-visibility', ({ show }) => { state.showSongDetails = show; applySongDetails(show); });
+socket.on('playlist-visibility', ({ show }) => {
+  state.showPlaylist = show; applySidebar(show);
+});
+socket.on('qr-visibility', ({ show }) => {
+  state.showQR = show; updateCornerBadge();
+});
+socket.on('room-code-visibility', ({ show }) => {
+  state.showRoomCode = show; updateCornerBadge();
+});
+socket.on('song-details-visibility', ({ show }) => {
+  state.showSongDetails = show; applySongDetails(show);
+});
 
 socket.on('current-singer-update', ({ singerName: n }) => {
   if (state.currentSong) { state.currentSong.singerName = n; singerName.textContent = n; }
@@ -762,12 +786,29 @@ socket.on('emoji-reaction', ({ emoji, name }) => {
 
 socket.on('score-reveal', showScore);
 
-socket.on('toggle-fullscreen', () => {
-  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
-  else document.exitFullscreen?.();
+socket.on('client-joined', ({ name }) => showToast('👋', `${name} joined`));
+socket.on('client-left',   ({ name }) => showToast('👤', `${name} left`));
+
+socket.on('song-added', ({ title, singerName }) => {
+  const banner = document.getElementById('song-added-banner');
+  // Remove any existing card so rapid adds don't stack
+  banner.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'sa-card';
+  card.innerHTML = `
+    <div class="sa-texts">
+      <div class="sa-label">🎵 Added to queue</div>
+      <div class="sa-title">${esc(title)}</div>
+      <div class="sa-singer">🎤 ${esc(singerName)}</div>
+    </div>`;
+  banner.appendChild(card);
+  setTimeout(() => { if (banner.contains(card)) card.remove(); }, 4500);
 });
 
-socket.on('client-joined', ({ name }) => showToast('👋', `${name} joined`));
+socket.on('client-count', ({ count }) => {
+  document.getElementById('client-count-text').textContent =
+    count === 1 ? '1 guest online' : `${count} guests online`;
+});
 </script>
 </body>
 </html>

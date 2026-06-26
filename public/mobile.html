@@ -9,8 +9,8 @@
 <meta name="theme-color" content="#060612">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon.svg">
-<title>CyberKTV Remote v1.2</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<title>CyberKTV Remote v1.8</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&family=Cinzel:wght@400;700;900&family=Noto+Sans:wght@400;600;700&family=Nunito:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 /* ── Reset ──────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -26,6 +26,7 @@ html,body{height:100%;-webkit-text-size-adjust:100%}
   --nav-bg:rgba(8,8,28,0.84);--nav-border:rgba(255,255,255,0.1);
   --btn-bg:rgba(0,245,255,0.1);--btn-border:rgba(0,245,255,0.3);
   --active:#00f5ff;--tog-on:#00f5ff;--tog-off:rgba(255,255,255,0.15);
+  /* Neon: futuristic cyberpunk */
   --font-h:'Orbitron',sans-serif;--font-b:'Inter',sans-serif;
 }
 body.theme-ktv{
@@ -36,6 +37,8 @@ body.theme-ktv{
   --nav-bg:rgba(20,0,0,0.9);--nav-border:rgba(255,215,0,0.15);
   --btn-bg:rgba(255,215,0,0.1);--btn-border:rgba(255,215,0,0.3);
   --active:#ffd700;--tog-on:#ffd700;
+  /* KTV: classic elegant serif headings, clean body */
+  --font-h:'Cinzel',serif;--font-b:'Noto Sans',sans-serif;
 }
 body.theme-glass{
   --bg:#141218;--bg2:#1d1b20;--bg3:#2d2c31;
@@ -44,6 +47,8 @@ body.theme-glass{
   --nav-bg:#2d2c31;--nav-border:rgba(255,255,255,0.08);
   --btn-bg:rgba(208,188,255,0.1);--btn-border:rgba(208,188,255,0.22);
   --active:#d0bcff;--tog-on:#d0bcff;
+  /* Glass/Material: modern rounded sans */
+  --font-h:'Nunito',sans-serif;--font-b:'Nunito',sans-serif;
 }
 body.theme-retro{
   --bg:#000;--bg2:#000800;--bg3:#001400;
@@ -52,13 +57,25 @@ body.theme-retro{
   --nav-bg:rgba(0,8,0,0.94);--nav-border:rgba(0,255,65,0.2);
   --btn-bg:rgba(0,255,65,0.08);--btn-border:rgba(0,255,65,0.25);
   --active:#00ff41;--tog-on:#00ff41;
+  /* Retro: phosphor terminal monospace */
   --font-h:'Share Tech Mono',monospace;--font-b:'Share Tech Mono',monospace;
 }
 
 /* ── Shell ──────────────────────────────── */
-body{display:flex;flex-direction:column;background:var(--bg);color:var(--text);font-family:var(--font-b);overflow:hidden;
-  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
-#app{display:flex;flex-direction:column;height:100dvh;height:100vh}
+body{
+  display:flex;flex-direction:column;
+  height:100dvh;height:100vh; /* body owns the viewport height */
+  background:var(--bg);color:var(--text);font-family:var(--font-b);
+  overflow:hidden;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#app{
+  flex:1;min-height:0; /* fill body, allow flex shrink */
+  display:flex;flex-direction:column;
+  width:100%;
+  overflow:hidden;
+}
 
 /* ── PWA Banner ─────────────────────────── */
 #install-banner{position:fixed;top:0;left:0;right:0;z-index:300;
@@ -96,27 +113,27 @@ body{display:flex;flex-direction:column;background:var(--bg);color:var(--text);f
 .err{font-size:.8rem;color:var(--a2);text-align:center;min-height:18px}
 
 /* ── Main screen ────────────────────────── */
-#main-screen{display:none;flex-direction:column;height:100%;min-height:0}
+#main-screen{display:none;flex-direction:column;flex:1;min-height:0;width:100%}
 #tab-panels{flex:1;overflow:hidden;position:relative;min-height:0}
 .panel{position:absolute;inset:0;overflow-y:auto;display:none;padding-bottom:90px}
 .panel.active{display:block}
 .panel::-webkit-scrollbar{width:3px}
 .panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
-/* ══ QUEUE ════════════════════════════════ */
+/* ══ QUEUE — compact, singer read-only ═══ */
 .q-empty{padding:44px 20px;text-align:center;color:var(--text2);line-height:2;font-size:.88rem}
-.q-item{display:flex;gap:10px;align-items:center;padding:9px 12px;
+.q-num{width:20px;flex-shrink:0;font-size:.7rem;font-weight:700;
+  color:var(--text2);text-align:center;font-family:var(--font-h);letter-spacing:0}
+.q-item{display:flex;gap:8px;align-items:center;padding:7px 10px;
   border-bottom:1px solid var(--border);background:var(--bg)}
-.q-thumb{width:52px;height:39px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--bg3)}
+.q-thumb{width:44px;height:33px;object-fit:cover;border-radius:5px;flex-shrink:0;background:var(--bg3)}
 .q-info{flex:1;overflow:hidden;min-width:0}
-.q-title{font-size:.83rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.q-singer-inp{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);
-  color:var(--a1);font-family:var(--font-b);font-size:.74rem;outline:none;padding:2px 0;margin-top:3px}
-.q-singer-inp::placeholder{color:var(--text2)}
-.q-btns{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
-.q-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:7px;
-  width:30px;height:24px;display:flex;align-items:center;justify-content:center;
-  font-size:.78rem;cursor:pointer;color:var(--text)}
+.q-title{font-size:.8rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-singer-lbl{font-size:.68rem;color:var(--a1);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-btns{display:flex;gap:3px;flex-shrink:0}
+.q-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:6px;
+  width:26px;height:22px;display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;cursor:pointer;color:var(--text)}
 .q-btn:active{opacity:.7}
 .q-btn:disabled{opacity:.22;cursor:default}
 .q-btn.del{border-color:rgba(255,80,80,.3);color:#ff5555;background:rgba(255,80,80,.07)}
@@ -147,55 +164,73 @@ body{display:flex;flex-direction:column;background:var(--bg);color:var(--text);f
 .r-add:active{opacity:.82}
 
 /* ══ CONTROL ══════════════════════════════ */
-/* Now playing */
-#ctrl-np{display:flex;gap:10px;align-items:center;padding:12px 14px;
-  background:var(--bg2);border-bottom:1px solid var(--border)}
-#ctrl-np-thumb{width:54px;height:40px;object-fit:cover;border-radius:7px;flex-shrink:0;background:var(--bg3)}
-.ctrl-np-text{flex:1;min-width:0}
-#ctrl-np-title{font-size:.88rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#ctrl-np-singer{font-size:.74rem;color:var(--a1);margin-top:2px}
-/* Scrubber */
-.ctrl-scrub{padding:8px 14px 2px}
+
+/* Now Playing — popup card style */
+#ctrl-np-card{
+  margin:12px 12px 0;
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  border:1px solid var(--border);border-radius:18px;
+  overflow:hidden;box-shadow:var(--glow),0 4px 24px rgba(0,0,0,.3)}
+#ctrl-np-card.empty{opacity:.45}
+.np-top{display:flex;align-items:center;gap:12px;padding:12px 14px 8px}
+#ctrl-np-thumb{width:54px;height:54px;object-fit:cover;border-radius:10px;
+  flex-shrink:0;background:var(--bg3)}
+.np-texts{flex:1;min-width:0}
+.np-label{font-size:.56rem;font-family:var(--font-h);letter-spacing:.18em;
+  color:var(--a2);text-transform:uppercase;font-weight:700;margin-bottom:3px}
+.np-song{font-size:.92rem;font-weight:700;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.np-singer{font-size:.74rem;color:var(--a1);margin-top:2px}
+/* Scrubber inside card */
+.np-scrub{padding:0 14px 4px}
 #ctrl-scrubber{-webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
   outline:none;cursor:pointer;
-  background:linear-gradient(to right,var(--a1) var(--cpct,0%),var(--bg3) var(--cpct,0%))}
-#ctrl-scrubber::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  background:linear-gradient(to right,var(--a1) var(--cpct,0%),rgba(255,255,255,.15) var(--cpct,0%))}
+#ctrl-scrubber::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
   border-radius:50%;background:var(--a1);box-shadow:var(--glow);cursor:pointer}
-.ctrl-time{display:flex;justify-content:space-between;font-size:.67rem;color:var(--text2);padding:2px 14px 8px}
+.np-time{display:flex;justify-content:space-between;font-size:.64rem;color:var(--text2);padding:2px 14px 10px}
+
 /* Playback buttons */
-.pb-row{display:flex;align-items:center;justify-content:center;gap:16px;padding:6px 14px 10px}
+.pb-row{display:flex;align-items:center;justify-content:center;gap:14px;padding:8px 14px 10px}
 .pb-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:50%;
-  width:50px;height:50px;display:flex;align-items:center;justify-content:center;
+  width:48px;height:48px;display:flex;align-items:center;justify-content:center;
   cursor:pointer;font-size:1.1rem;color:var(--text);transition:transform .1s;flex-shrink:0}
 .pb-btn:active{transform:scale(.86)}
-.pb-btn.play{width:62px;height:62px;font-size:1.45rem;background:var(--a1);border-color:var(--a1);color:var(--bg)}
+.pb-btn.play{width:60px;height:60px;font-size:1.4rem;background:var(--a1);border-color:var(--a1);color:var(--bg)}
+.pb-btn.reconnect{font-size:.72rem;font-family:var(--font-h);letter-spacing:.03em;
+  width:auto;border-radius:22px;padding:0 12px;height:42px;gap:4px}
+
 /* Volume + mute */
 .ctrl-vol-row{display:flex;align-items:center;gap:8px;padding:4px 14px 12px}
 .v-icon{font-size:.9rem;color:var(--text2);flex-shrink:0}
 #ctrl-vol{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:2px;outline:none;cursor:pointer;
-  background:linear-gradient(to right,var(--a1) var(--vp,80%),var(--bg3) var(--vp,80%))}
-#ctrl-vol::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  background:linear-gradient(to right,var(--a1) var(--vp,80%),rgba(255,255,255,.15) var(--vp,80%))}
+#ctrl-vol::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
   border-radius:50%;background:var(--a1);box-shadow:var(--glow);cursor:pointer}
 .mute-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:9px;
-  padding:8px 12px;font-size:.82rem;color:var(--text2);cursor:pointer;flex-shrink:0;white-space:nowrap}
+  padding:7px 11px;font-size:.8rem;color:var(--text2);cursor:pointer;flex-shrink:0;white-space:nowrap}
 .mute-btn.on{color:var(--a2);border-color:rgba(255,80,80,.4);background:rgba(255,80,80,.08)}
+
 /* Section header */
 .s-hdr{font-size:.66rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;
   padding:12px 14px 6px;border-top:1px solid var(--border)}
-.s-hdr:first-of-type{border-top:none}
+
 /* Score */
 #ctrl-score{display:none;margin:8px 14px;background:var(--card);border:1px solid var(--a1);
   border-radius:13px;padding:14px;text-align:center;box-shadow:var(--glow)}
 #ctrl-score-singer{font-size:.76rem;color:var(--text2);margin-bottom:2px}
 #ctrl-score-val{font-family:var(--font-h);font-size:2.4rem;color:var(--a1);font-weight:900;text-shadow:var(--glow)}
 #ctrl-score-stars{font-size:1.3rem;margin-top:3px}
-/* Emoji grid */
-.emoji-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:10px 14px 14px}
-.emoji-btn{background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:13px;
-  padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .1s}
+
+/* Reactions — single compact row of 5 */
+.emoji-row{display:flex;gap:6px;padding:8px 14px 10px}
+.emoji-btn{flex:1;background:var(--btn-bg);border:1px solid var(--btn-border);border-radius:12px;
+  padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;transition:transform .1s}
 .emoji-btn:active{transform:scale(.86)}
-.emoji-big{font-size:2rem;line-height:1}
-.emoji-lbl{font-size:.68rem;color:var(--text2)}
+.emoji-big{font-size:1.45rem;line-height:1}
+.emoji-lbl{font-size:.56rem;color:var(--text2)}
+
 /* Toggle rows */
 .tgl-row{display:flex;align-items:center;justify-content:space-between;
   padding:13px 14px;border-bottom:1px solid var(--border);background:var(--bg);cursor:pointer}
@@ -251,21 +286,38 @@ body{display:flex;flex-direction:column;background:var(--bg);color:var(--text);f
 .app-ver{text-align:center;padding:20px 14px;font-size:.7rem;color:var(--text2);opacity:.4}
 
 /* ── Floating glass nav ──────────────────── */
-#tab-bar{position:fixed;bottom:max(14px,env(safe-area-inset-bottom,14px));
+#tab-bar{position:fixed;bottom:max(12px,env(safe-area-inset-bottom,12px));
   left:50%;transform:translateX(-50%);
   background:var(--nav-bg);
   backdrop-filter:blur(28px) saturate(1.8);-webkit-backdrop-filter:blur(28px) saturate(1.8);
-  border:1px solid var(--nav-border);border-radius:28px;padding:5px;
+  border:1px solid var(--nav-border);border-radius:32px;padding:6px;
   display:flex;gap:2px;
-  box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 0 0 0.5px rgba(255,255,255,.05);
-  z-index:100;width:calc(100% - 28px);max-width:420px}
+  box-shadow:0 8px 36px rgba(0,0,0,.55),
+             inset 0 0 0 0.5px rgba(255,255,255,.07),
+             0 0 18px rgba(0,245,255,0.18),
+             0 0 40px rgba(0,245,255,0.08);
+  z-index:100;width:calc(100% - 24px);max-width:440px;
+  transition:box-shadow .3s}
 body.theme-glass #tab-bar{backdrop-filter:none;-webkit-backdrop-filter:none}
-.tab-btn{flex:1;padding:8px 4px;background:none;border:none;color:rgba(255,255,255,.3);
-  font-family:var(--font-b);font-size:.62rem;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:22px;transition:color .18s,background .18s}
-.tab-btn .ti{font-size:1.2rem;line-height:1}
-.tab-btn.active{background:rgba(255,255,255,.1);color:var(--active)}
-.tab-btn.active .ti{filter:drop-shadow(0 0 5px var(--active))}
+/* Theme-matched glow colours on tab bar */
+body.theme-ktv   #tab-bar{box-shadow:0 8px 36px rgba(0,0,0,.55),inset 0 0 0 0.5px rgba(255,255,255,.07),0 0 18px rgba(255,215,0,0.22),0 0 40px rgba(255,215,0,0.09)}
+body.theme-glass #tab-bar{box-shadow:0 8px 36px rgba(0,0,0,.45),inset 0 0 0 0.5px rgba(255,255,255,.07),0 0 18px rgba(208,188,255,0.18),0 0 40px rgba(208,188,255,0.07)}
+body.theme-retro #tab-bar{box-shadow:0 8px 36px rgba(0,0,0,.55),inset 0 0 0 0.5px rgba(255,255,255,.07),0 0 18px rgba(0,255,65,0.25),0 0 40px rgba(0,255,65,0.10)}
+.tab-btn{flex:1;padding:7px 6px 8px;background:none;border:none;
+  color:rgba(255,255,255,.28);font-family:var(--font-b);font-size:.6rem;
+  letter-spacing:.02em;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  border-radius:26px;transition:color .2s,background .2s;position:relative}
+/* Icon container with pill highlight */
+.tab-btn .ti-wrap{
+  width:44px;height:28px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;transition:background .2s;margin-bottom:3px}
+.tab-btn .ti{font-size:1.25rem;line-height:1;display:block;transition:transform .2s,filter .2s}
+.tab-btn .tl{display:block;line-height:1;font-size:.6rem;font-weight:500}
+.tab-btn.active{color:var(--active)}
+.tab-btn.active .ti-wrap{background:rgba(255,255,255,.12)}
+.tab-btn.active .ti{transform:scale(1.12);filter:drop-shadow(0 0 6px var(--active))}
 
 /* ── Modals ──────────────────────────────── */
 .modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);
@@ -288,7 +340,7 @@ body.theme-glass #tab-bar{backdrop-filter:none;-webkit-backdrop-filter:none}
   padding:11px;color:var(--text2);font-family:var(--font-b);font-size:.86rem;cursor:pointer}
 .btn-confirm{flex:2;background:var(--a1);border:none;border-radius:9px;padding:11px;
   color:var(--bg);font-family:var(--font-h);font-size:.8rem;font-weight:700;cursor:pointer;letter-spacing:.06em}
-/* QR modal — centered */
+/* QR modal */
 #qr-modal{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.8);
   backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:24px}
 #qr-modal.show{display:flex}
@@ -311,10 +363,56 @@ body.theme-glass #tab-bar{backdrop-filter:none;-webkit-backdrop-filter:none}
 
 /* ── Responsive ──────────────────────────── */
 @media(min-width:600px){
-  #main-screen{max-width:560px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
-  .emoji-grid{grid-template-columns:repeat(6,1fr)}
+  /* Full-width layout — no max-width, no side borders */
   .theme-grid{grid-template-columns:repeat(4,1fr)}
-  #tab-bar{max-width:380px}
+  .emoji-row{gap:10px}
+  /* Tab bar stays pill-shaped and centered, but wider */
+  #tab-bar{max-width:560px}
+}
+@media(min-width:768px){
+  /* Tablet — larger touch targets, more breathing room */
+  .panel{padding-bottom:100px}
+  #tab-bar{
+    max-width:640px;
+    bottom:max(18px,env(safe-area-inset-bottom,18px));
+  }
+  .tab-btn .ti-wrap{width:54px;height:32px}
+  .tab-btn .ti{font-size:1.35rem}
+  .tab-btn .tl{font-size:.66rem}
+  #ctrl-np-card{margin:18px 20px 0}
+  .pb-row{gap:24px;padding:12px 24px 14px}
+  .ctrl-vol-row{padding:6px 24px 14px}
+  .emoji-row{padding:10px 24px 12px;gap:12px}
+  .tgl-row{padding:15px 24px}
+  .s-hdr{padding:14px 24px 8px}
+  .srch-sticky{padding:12px 20px;gap:10px}
+  .q-item{padding:10px 20px}
+  .q-thumb{width:56px;height:42px}
+  .r-item{padding:11px 20px}
+  .r-thumb{width:80px;height:58px}
+  .prof-hero{padding:28px 24px 20px}
+  .prof-row{padding:14px 24px}
+  .sec-hdr{padding:14px 24px 8px}
+  .act-btn,.danger-btn{margin:6px 20px 0;padding:15px 18px}
+  .theme-grid{padding:0 20px 14px;gap:12px}
+  .join-card{padding:28px}
+}
+@media(min-width:1024px){
+  /* Large tablet / desktop */
+  #tab-bar{max-width:720px}
+  .panel{padding-bottom:110px}
+  .q-item{padding:11px 28px}
+  .tgl-row{padding:16px 28px}
+  .s-hdr{padding:16px 28px 8px}
+  .emoji-row{padding:12px 28px 14px}
+  .pb-row{padding:14px 28px 16px}
+  .ctrl-vol-row{padding:8px 28px 16px}
+  #ctrl-np-card{margin:20px 28px 0}
+  .srch-sticky{padding:14px 28px}
+  .r-item{padding:12px 28px}
+  .prof-row{padding:15px 28px}
+  .act-btn,.danger-btn{margin:6px 28px 0}
+  .theme-grid{padding:0 28px 14px}
 }
 </style>
 </head>
@@ -384,29 +482,30 @@ body.theme-glass #tab-bar{backdrop-filter:none;-webkit-backdrop-filter:none}
     <!-- CONTROL -->
     <div class="panel" id="panel-control">
 
-      <!-- Now Playing -->
-      <div id="ctrl-np">
-        <img id="ctrl-np-thumb" src="" alt="">
-        <div class="ctrl-np-text">
-          <div id="ctrl-np-title">No song playing</div>
-          <div id="ctrl-np-singer"></div>
+      <!-- Now Playing — popup card -->
+      <div id="ctrl-np-card" class="empty">
+        <div class="np-top">
+          <img id="ctrl-np-thumb" src="" alt="">
+          <div class="np-texts">
+            <div class="np-label">Now Playing</div>
+            <div class="np-song" id="ctrl-np-title">No song playing</div>
+            <div class="np-singer" id="ctrl-np-singer"></div>
+          </div>
         </div>
-      </div>
-
-      <!-- Scrubber -->
-      <div class="ctrl-scrub">
-        <input type="range" id="ctrl-scrubber" min="0" max="1000" value="0">
-      </div>
-      <div class="ctrl-time">
-        <span id="ctrl-time-cur">0:00</span>
-        <span id="ctrl-time-dur">0:00</span>
+        <div class="np-scrub">
+          <input type="range" id="ctrl-scrubber" min="0" max="1000" value="0">
+        </div>
+        <div class="np-time">
+          <span id="ctrl-time-cur">0:00</span>
+          <span id="ctrl-time-dur">0:00</span>
+        </div>
       </div>
 
       <!-- Playback -->
       <div class="pb-row">
         <button class="pb-btn play" id="ctrl-play">▶</button>
         <button class="pb-btn" id="ctrl-next" style="font-size:1rem">⏭</button>
-        <button class="pb-btn" id="ctrl-fs" title="Full Screen on TV" style="font-size:1rem">⛶</button>
+        <button class="pb-btn reconnect" id="ctrl-reconnect">⟳ Sync</button>
       </div>
 
       <!-- Volume + Mute -->
@@ -424,32 +523,25 @@ body.theme-glass #tab-bar{backdrop-filter:none;-webkit-backdrop-filter:none}
         <div id="ctrl-score-stars"></div>
       </div>
 
-      <!-- Reactions -->
+      <!-- Reactions — compact single row, 5 emojis -->
       <div class="s-hdr" style="border-top:none;padding-top:4px">🎉 Reactions</div>
-      <div class="emoji-grid">
+      <div class="emoji-row">
         <button class="emoji-btn" data-emoji="👏"><div class="emoji-big">👏</div><div class="emoji-lbl">Applause</div></button>
         <button class="emoji-btn" data-emoji="❤️"><div class="emoji-big">❤️</div><div class="emoji-lbl">Love</div></button>
         <button class="emoji-btn" data-emoji="🔥"><div class="emoji-big">🔥</div><div class="emoji-lbl">Fire</div></button>
-        <button class="emoji-btn" data-emoji="😂"><div class="emoji-big">😂</div><div class="emoji-lbl">LOL</div></button>
+        <button class="emoji-btn" data-emoji="😂"><div class="emoji-big">😂</div><div class="emoji-lbl">LoL</div></button>
         <button class="emoji-btn" data-emoji="⭐"><div class="emoji-big">⭐</div><div class="emoji-lbl">Star</div></button>
-        <button class="emoji-btn" data-emoji="🎤"><div class="emoji-big">🎤</div><div class="emoji-lbl">Mic Drop</div></button>
       </div>
 
       <!-- TV Display Toggles -->
       <div class="s-hdr">📺 TV Display</div>
-      <div class="tgl-row" data-evt="toggle-qr">
+      <!-- Combined QR + Room Code toggle -->
+      <div class="tgl-row" data-evt="toggle-qr-room">
         <div class="tgl-left">
           <span class="tgl-icon">📲</span>
-          <div><div>Show QR Code</div><div class="tgl-desc">Top-right corner of TV</div></div>
+          <div><div>Room Code &amp; QR</div><div class="tgl-desc">Corner badge on TV</div></div>
         </div>
-        <div class="tgl" id="ts-qr"></div>
-      </div>
-      <div class="tgl-row" data-evt="toggle-room-code">
-        <div class="tgl-left">
-          <span class="tgl-icon">🏷</span>
-          <div><div>Room Code</div><div class="tgl-desc">Top-left corner of TV</div></div>
-        </div>
-        <div class="tgl on" id="ts-roomcode"></div>
+        <div class="tgl on" id="ts-qrroom"></div>
       </div>
       <div class="tgl-row" data-evt="toggle-song-details">
         <div class="tgl-left">
@@ -500,17 +592,17 @@ body.theme-glass #tab-bar{backdrop-filter:none;-webkit-backdrop-filter:none}
         <div><div class="ab-main">Leave Room</div><div class="ab-sub">Return to the join screen</div></div>
       </div>
 
-      <div class="app-ver">CyberKTV v1.2 · Made with 🎤</div>
+      <div class="app-ver">CyberKTV v1.8 · Made with 🎤</div>
     </div>
 
   </div><!-- /tab-panels -->
 
   <!-- Floating nav -->
   <nav id="tab-bar">
-    <button class="tab-btn active" data-tab="queue"><div class="ti">📋</div>Queue</button>
-    <button class="tab-btn" data-tab="search"><div class="ti">🔍</div>Add Song</button>
-    <button class="tab-btn" data-tab="control"><div class="ti">🎛</div>Control</button>
-    <button class="tab-btn" data-tab="profile"><div class="ti">👤</div>Profile</button>
+    <button class="tab-btn active" data-tab="queue"><div class="ti-wrap"><span class="ti">📋</span></div><span class="tl">Queue</span></button>
+    <button class="tab-btn" data-tab="search"><div class="ti-wrap"><span class="ti">🔍</span></div><span class="tl">Add Song</span></button>
+    <button class="tab-btn" data-tab="control"><div class="ti-wrap"><span class="ti">🎛️</span></div><span class="tl">Control</span></button>
+    <button class="tab-btn" data-tab="profile"><div class="ti-wrap"><span class="ti">👤</span></div><span class="tl">Profile</span></button>
   </nav>
 </div><!-- /main-screen -->
 </div><!-- /app -->
@@ -554,8 +646,6 @@ const isStandalone = window.matchMedia('(display-mode: standalone)').matches
   || window.navigator.standalone === true;
 
 let deferredPrompt = null;
-
-// Detect platform
 const ua = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(ua);
 const isAndroid = /android/i.test(ua);
@@ -566,41 +656,28 @@ function showInstallBanner() {
   const banner = document.getElementById('install-banner');
   const steps  = document.getElementById('install-steps');
   const btn    = document.getElementById('install-btn');
-
   if (deferredPrompt) {
-    // Android Chrome with beforeinstallprompt available — use native prompt
-    btn.style.display = 'block';
-    steps.textContent = '';
+    btn.style.display = 'block'; steps.textContent = '';
   } else if (isIOS && isSafari) {
-    // iOS Safari: must use manual Add to Home Screen
     btn.style.display = 'none';
     steps.innerHTML = '1. Tap the <strong>Share</strong> button ↑ at the bottom of Safari<br>2. Scroll down and tap <strong>"Add to Home Screen"</strong>';
   } else if (isAndroid) {
-    // Android but beforeinstallprompt hasn't fired (HTTP local network — normal)
     btn.style.display = 'none';
     steps.innerHTML = '1. Tap the <strong>⋮ menu</strong> in Chrome (top right)<br>2. Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>';
   } else {
-    // Desktop or unknown — show generic instructions
     btn.style.display = 'none';
     steps.innerHTML = 'Open in Chrome/Safari on your phone → menu → <strong>Add to Home Screen</strong>';
   }
-
   banner.classList.add('show');
 }
 
-// Android Chrome over HTTPS — native prompt available
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
+  e.preventDefault(); deferredPrompt = e;
   setTimeout(showInstallBanner, 2000);
 });
-
-// iOS Safari & Android HTTP — show manual instructions automatically
 if (!isStandalone && (isIOS || isAndroid) && !sessionStorage.getItem('pwa-dismissed')) {
-  // Delay so page is fully loaded before banner appears
   setTimeout(() => { if (!deferredPrompt) showInstallBanner(); }, 2500);
 }
-
 document.getElementById('install-btn').addEventListener('click', async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
@@ -612,7 +689,6 @@ document.getElementById('install-btn').addEventListener('click', async () => {
 document.getElementById('install-dismiss').addEventListener('click', () => {
   document.getElementById('install-banner').classList.remove('show');
   deferredPrompt = null;
-  // Remember dismissal for this session so it doesn't re-appear
   sessionStorage.setItem('pwa-dismissed', '1');
 });
 
@@ -630,15 +706,14 @@ function toast(msg, dur=2200) {
 // ── App state ─────────────────────────────────────────────
 let myName = 'Guest', roomCode = null, joinUrl = '';
 let ctrlScrubbing = false;
+let isReconnecting = false;
 let appState = {
   queue:[], currentSong:null, isPlaying:false, currentTime:0, duration:0,
-  volume:80, theme:'neon', showPlaylist:true, showQR:false,
+  volume:80, theme:'neon', showPlaylist:true, showQR:true,
   showRoomCode:true, showSongDetails:true, isMuted:false
 };
-// Toggle state mirrors (for optimistic UI)
-const togState = { qr:false, roomcode:true, songdetails:true, playlist:true };
+const togState = { qrroom:true, songdetails:true, playlist:true };
 
-// Pre-fill room code from URL param
 const urlParams = new URLSearchParams(location.search);
 if (urlParams.get('room')) document.getElementById('code-input').value = urlParams.get('room').toUpperCase();
 
@@ -665,33 +740,42 @@ function showErr(msg) {
 }
 
 socket.on('room-joined', ({ state: s, lanIP, port }) => {
+  if (isReconnecting) {
+    isReconnecting = false;
+    applyState(s);
+    toast('Reconnected ✓');
+    return;
+  }
   roomCode = s.roomCode;
   const base = lanIP && lanIP !== 'localhost' ? `http://${lanIP}:${port}` : location.origin;
   joinUrl = `${base}/mobile.html?room=${s.roomCode}`;
 
-  // Populate profile
   document.getElementById('prof-avatar').textContent = myName.charAt(0).toUpperCase();
   document.getElementById('prof-name').textContent = myName;
   document.getElementById('prof-room').textContent = s.roomCode;
   document.getElementById('pr-code').textContent = s.roomCode;
   document.getElementById('pr-name').textContent = myName;
   document.getElementById('pr-server').textContent = (lanIP || location.hostname) + ':' + (port || 3000);
-
-  // Pre-fill singer field with user name
   document.getElementById('modal-singer').value = myName;
 
-  // Switch screens
   document.getElementById('join-screen').style.display = 'none';
   document.getElementById('main-screen').style.display = 'flex';
 
   applyState(s);
 
-  // Show PWA install prompt when accessed via QR scan
   if (urlParams.get('room') && deferredPrompt)
     setTimeout(() => document.getElementById('install-banner').classList.add('show'), 3000);
 });
 
 socket.on('join-error', ({ message }) => showErr(message));
+
+// Auto-reconnect on socket reconnect
+socket.on('connect', () => {
+  if (roomCode && document.getElementById('main-screen').style.display !== 'none') {
+    isReconnecting = true;
+    socket.emit('join-room', { code: roomCode, name: myName });
+  }
+});
 
 // ── State ─────────────────────────────────────────────────
 function applyState(s) {
@@ -703,22 +787,24 @@ function applyState(s) {
   setScrubber(appState.currentTime, appState.duration);
   setVolUI(appState.volume);
   setMuteUI(appState.isMuted);
-  setTog('qr', appState.showQR);
-  setTog('roomcode', appState.showRoomCode);
+  setTog('qrroom', appState.showQR || appState.showRoomCode);
   setTog('songdetails', appState.showSongDetails);
   setTog('playlist', appState.showPlaylist);
 }
 
 function updateNP() {
   const song = appState.currentSong;
-  const thumb = document.getElementById('ctrl-np-thumb');
-  const title = document.getElementById('ctrl-np-title');
+  const card   = document.getElementById('ctrl-np-card');
+  const thumb  = document.getElementById('ctrl-np-thumb');
+  const title  = document.getElementById('ctrl-np-title');
   const singer = document.getElementById('ctrl-np-singer');
   if (song) {
+    card.classList.remove('empty');
     thumb.src = song.thumbnail;
     title.textContent = song.title;
     singer.textContent = '🎤 ' + song.singerName;
   } else {
+    card.classList.add('empty');
     thumb.src = '';
     title.textContent = 'No song playing';
     singer.textContent = '';
@@ -763,7 +849,7 @@ function applyTheme(theme) {
   document.querySelectorAll('.tc').forEach(c => c.classList.toggle('active', c.dataset.t === theme));
 }
 
-// ── Queue panel ───────────────────────────────────────────
+// ── Queue panel — read-only singer ────────────────────────
 function updateQueue() {
   const list = document.getElementById('queue-list');
   if (!appState.queue.length) {
@@ -772,10 +858,11 @@ function updateQueue() {
   }
   list.innerHTML = appState.queue.map((s, i) => `
     <div class="q-item" data-id="${esc(s.id)}">
+      <div class="q-num">${i + 1}</div>
       <img class="q-thumb" src="${esc(s.thumbnail)}" alt="" loading="lazy">
       <div class="q-info">
         <div class="q-title">${esc(s.title)}</div>
-        <input class="q-singer-inp" value="${esc(s.singerName)}" placeholder="Singer name" data-id="${esc(s.id)}">
+        <div class="q-singer-lbl">🎤 ${esc(s.singerName)}</div>
       </div>
       <div class="q-btns">
         <button class="q-btn" data-dir="up" data-idx="${i}" ${i===0?'disabled':''}>▲</button>
@@ -783,10 +870,6 @@ function updateQueue() {
         <button class="q-btn del" data-id="${esc(s.id)}">✕</button>
       </div>
     </div>`).join('');
-
-  list.querySelectorAll('.q-singer-inp').forEach(inp =>
-    inp.addEventListener('change', () =>
-      socket.emit('update-singer', { songId: inp.dataset.id, singerName: inp.value })));
 
   list.querySelectorAll('.q-btn[data-dir]').forEach(btn =>
     btn.addEventListener('click', () => {
@@ -808,9 +891,18 @@ function updateQueue() {
 // ── Control tab ───────────────────────────────────────────
 document.getElementById('ctrl-play').addEventListener('click', () => socket.emit('play-pause'));
 document.getElementById('ctrl-next').addEventListener('click', () => socket.emit('next-song'));
-document.getElementById('ctrl-fs').addEventListener('click', () => {
-  socket.emit('toggle-fullscreen');
-  toast('Fullscreen toggled on TV ⛶');
+
+// Reconnect button
+document.getElementById('ctrl-reconnect').addEventListener('click', () => {
+  if (!roomCode) { toast('Not in a room'); return; }
+  toast('Reconnecting…');
+  isReconnecting = true;
+  if (!socket.connected) {
+    socket.connect();
+    socket.once('connect', () => socket.emit('join-room', { code: roomCode, name: myName }));
+  } else {
+    socket.emit('join-room', { code: roomCode, name: myName });
+  }
 });
 
 // Scrubber
@@ -839,14 +931,12 @@ document.getElementById('ctrl-vol').addEventListener('input', function() {
 // Mute
 document.getElementById('ctrl-mute').addEventListener('click', () => socket.emit('mute-toggle'));
 
-// Display toggles — each row emits its event directly
+// Display toggles
 document.querySelectorAll('.tgl-row[data-evt]').forEach(row =>
   row.addEventListener('click', () => {
     const evt = row.dataset.evt;
     socket.emit(evt);
-    // Determine which key maps to this event for optimistic UI
-    const keyMap = { 'toggle-qr':'qr', 'toggle-room-code':'roomcode',
-                     'toggle-song-details':'songdetails', 'toggle-playlist':'playlist' };
+    const keyMap = { 'toggle-qr-room':'qrroom', 'toggle-song-details':'songdetails', 'toggle-playlist':'playlist' };
     const key = keyMap[evt];
     if (key) setTog(key, !togState[key]);
   }));
@@ -906,7 +996,6 @@ socket.on('search-results', ({ results, error }) => {
       <button class="r-add" data-i="${i}">+Add</button>
     </div>`).join('');
 
-  // +Add: direct add, no popup, stay on page
   box.querySelectorAll('.r-add').forEach(btn => btn.addEventListener('click', e => {
     e.stopPropagation();
     const v = window._sr[btn.dataset.i];
@@ -914,7 +1003,6 @@ socket.on('search-results', ({ results, error }) => {
     toast('Added: ' + v.title.slice(0, 30) + '… 🎵');
   }));
 
-  // Tap thumbnail or title → detail popup with singer input
   box.querySelectorAll('.r-thumb, .r-info').forEach(el => el.addEventListener('click', () =>
     openDetail(window._sr[el.dataset.i])));
 });
@@ -994,44 +1082,26 @@ document.getElementById('qr-modal').addEventListener('click', e => {
 // ── Leave Room ────────────────────────────────────────────
 document.getElementById('quit-btn').addEventListener('click', () => {
   if (!confirm('Leave this room and return to the join screen?')) return;
-  leaveRoom();
-});
-
-function leaveRoom() {
   socket.emit('quit-room');
-}
-
-socket.on('quit-confirmed', () => {
-  resetAndShowJoin();
 });
+socket.on('quit-confirmed', () => resetAndShowJoin());
 
 function resetAndShowJoin() {
-  // Hide main, show join
   document.getElementById('main-screen').style.display = 'none';
   document.getElementById('join-screen').style.display = 'flex';
-
-  // Reset all local state
-  roomCode = null;
-  joinUrl = '';
-  qrBuilt = false;
+  roomCode = null; joinUrl = ''; qrBuilt = false; isReconnecting = false;
   appState = {
     queue:[], currentSong:null, isPlaying:false, currentTime:0, duration:0,
-    volume:80, theme:'neon', showPlaylist:true, showQR:false,
+    volume:80, theme:'neon', showPlaylist:true, showQR:true,
     showRoomCode:true, showSongDetails:true, isMuted:false
   };
-
-  // Reset UI
   applyTheme('neon');
   document.getElementById('code-input').value = '';
-  document.getElementById('name-input').value = myName; // keep name for re-join
+  document.getElementById('name-input').value = myName;
   document.getElementById('join-error').textContent = '';
   document.getElementById('qr-share-box').innerHTML = '';
-
-  // Reset nav to Queue tab
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'queue'));
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-queue'));
-
-  // Close any open modals
   document.getElementById('detail-modal').classList.remove('show');
   document.getElementById('qr-modal').classList.remove('show');
 }
@@ -1047,9 +1117,9 @@ socket.on('time-update', ({ currentTime, duration }) => {
 socket.on('volume-sync', ({ volume }) => { appState.volume = volume; setVolUI(volume); });
 socket.on('theme-changed', ({ theme }) => applyTheme(theme));
 socket.on('mute-sync', ({ muted }) => setMuteUI(muted));
-socket.on('qr-visibility', ({ show }) => setTog('qr', show));
-socket.on('room-code-visibility', ({ show }) => setTog('roomcode', show));
-socket.on('song-details-visibility', ({ show }) => setTog('songdetails', show));
+socket.on('qr-visibility', ({ show }) => { appState.showQR = show; setTog('qrroom', appState.showQR || appState.showRoomCode); });
+socket.on('room-code-visibility', ({ show }) => { appState.showRoomCode = show; setTog('qrroom', appState.showQR || appState.showRoomCode); });
+socket.on('song-details-visibility', ({ show }) => { appState.showSongDetails = show; setTog('songdetails', show); });
 socket.on('playlist-visibility', ({ show }) => { appState.showPlaylist = show; setTog('playlist', show); });
 socket.on('current-singer-update', ({ singerName }) => {
   if (appState.currentSong) { appState.currentSong.singerName = singerName; updateNP(); }
@@ -1063,12 +1133,6 @@ socket.on('score-reveal', data => {
   document.querySelector('.tab-btn[data-tab="control"]').click();
 });
 socket.on('disconnect', () => toast('Connection lost — reconnecting…', 4000));
-socket.on('connect', () => {
-  // Only show reconnect toast when we are in a room (main screen visible)
-  if (document.getElementById('main-screen').style.display !== 'none' && roomCode) {
-    toast('Reconnected ✓');
-  }
-});
 </script>
 </body>
 </html>
